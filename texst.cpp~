@@ -1,0 +1,9 @@
+#include<iostream>
+
+enum direction{
+  N=0,
+  S,
+  E,
+  W
+};
+

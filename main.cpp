@@ -1,22 +1,26 @@
 #include"raylib.h"
 
-#define WIDTH 800
-#define HEIGHT 800
+#define WIDTH 1000
+#define HEIGHT 1000
+
+#include"maze.hpp"
 
 int main(){
   //init window
   InitWindow(WIDTH,HEIGHT,"window");
   SetTargetFPS(60);
 
+  Maze mazee;
   while(!WindowShouldClose()){
     //handle input
 
     //update
-
+    
     //draw
     BeginDrawing();
     ClearBackground(BLUE);
 
+    mazee.Draw();
     EndDrawing();
   }
 
