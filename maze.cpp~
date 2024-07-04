@@ -1,0 +1,13 @@
+#include"maze.hpp"
+
+Maze::Maze(){
+  
+}
+
+Maze::~Maze(){
+
+}
+
+void Maze::Draw(){
+
+}
