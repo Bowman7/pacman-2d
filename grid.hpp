@@ -61,14 +61,26 @@ public:
   }
   void CheckAvailableDir();
   void PrintDir(directions dir[]);
+  void carveEnding();
+
+  void PushEnd(int x,int y){
+    e_top++;
+    posStack[e_top].x = x;
+    posStack[e_top].y = y;
+  }
+  void carveStart();
  
 private:
-  s_maze maze[9][9];
-  Stack stack[9];
+  int mazeSize = 10;
+  int stackSize = 10;
+  s_maze maze[40][40];
+  Stack stack[200];
+  Stack posStack[200];
   
   int top = -1;
+  int e_top =-1;
 
-  int size = 100;
+  int size = 25;
 
   
 

@@ -3,7 +3,7 @@
 #define WIDTH 1000
 #define HEIGHT 1000
 
-#include"maze.hpp"
+#include"grid.hpp"
 
 int main(){
   //init window
