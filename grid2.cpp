@@ -5,32 +5,47 @@ Maze::Maze(){
   //testMove();
   carvePassage(1,1);
   DeadEndsHorz();
-  //ReflectMaze();
+  CoverBoundry();
+  ReflectMaze();
   //SetupPath();
 }
 
 Maze::~Maze(){
 
 }
+//cover th =e boundry walls
+void Maze::CoverBoundry(){
+  //horizontal
+  for(int i=0;i<20;i++){
+    for(int j=0;j<40;j+=39){
+      maze[i][j].color = DARKBLUE;
+      maze[i][j].colVal = 2;
+    }
+  }
+}
 //check in n,s,e,w if forward dir is present
 int Maze::CheckPaths(int i,int j){
-  printf("In check paths pos: maze[%d][%d] /n ",i,j);
+  printf("In check paths pos: maze[%d][%d] \n",i,j);
   //north
   int val =0;
-  if(i-3>=1 && i+3<40 && j-3>=1&& j+3<40){
-    if(maze[i][j-2].colVal == 1){
+  if(i>=1 && i<40 && j>=1&& j<40){
+    if(maze[i][j-1].colVal == 1){
+      printf("north clear,north val : maze[%d][%d] : %d \n",i,j-1,maze[i][j-1].colVal);
       val++;
     }
     //south
     if(maze[i][j+2].colVal == 1){
+      printf("south clear \n");
       val++;
     }
     //east
     if(maze[i+2][j].colVal == 1){
+      printf("east clear \n");
       val++;
     }
     //west
-    if(maze[i-2][j].colVal == 1){
+    if(maze[i-1][j].colVal == 1){
+      printf("west clear \n");
       val++;
     }
   }
@@ -50,11 +65,55 @@ void Maze::clearDeadEnd(int x,int y){
 	  if(x>=1 && x<20 && y>=1 &&y<40){
 	    if( maze[x+2][y].colVal == 2 && maze[x+3][y].colVal == 1 ){
 	      printf("east side carve from maze[%d][%d] to maze[%d][%d] \n",x,y,x+2,y);
-	      maze[x+2][y].color = GREEN;
-	      maze[x+2][y+1].color = GREEN;
+	      maze[x+2][y].color = BLACK;
+	      maze[x+2][y+1].color = BLACK;
+
+	      maze[x+2][y].colVal = 1;
+	      maze[x+2][y+1].colVal = 1;
 	    }
 	  }
 	  carved = true;
+	}break;
+      case W:
+	{
+	  if(x>=1 && x<20 && y>=1 &&y<40){
+	    if(maze[x-1][y].colVal == 2 &&maze[x-3][y].colVal ==1 ){
+	      printf("west side carve \n");
+	      maze[x-1][y].color = BLACK;
+	      maze[x-1][y+1].color = BLACK;
+
+	      maze[x-1][y].colVal = 1;
+	      maze[x-1][y+1].colVal = 1;
+	    }
+	  }
+	  carved = true;
+	}break;
+      case N:
+	{
+	  if(x>=1 && x<20 && y>=1 && y<40){
+	    if(maze[x][y-1].colVal == 2 && maze[x][y-3].colVal == 1){
+	      printf("north side carve \n");
+	      maze[x][y-1].color = BLACK;
+	      maze[x+1][y-1].color = BLACK;
+
+	      maze[x][y-1].colVal = 1;
+	      maze[x+1][y-1].colVal = 1;
+	      
+	    }
+	  }
+	}break;
+      case S:
+	{
+	  if(x>=1 && x<20 && y>=1 && y<40){
+	    if(maze[x][y+2].colVal == 2 && maze[x][y+3].colVal == 1){
+	      printf("south side carve \n");
+	      maze[x][y+2].color = BLACK;
+	      maze[x+1][y+2].color = BLACK;
+	      
+	      maze[x][y+2].colVal = 1;
+	      maze[x+1][y+2].colVal = 1;
+	    }
+	  }
 	}break;
       default:
 	break;
@@ -64,45 +123,50 @@ void Maze::clearDeadEnd(int x,int y){
 }
 //clear hor dead ends
 void Maze::DeadEndsHorz(){
-  //1 check for dead ends in walk
+  /*
   int validPaths;
-  if(maze[1][1].colVal == 1){
-    validPaths = CheckPaths(1,1);
+  if(maze[4][4].colVal == 1){
+    validPaths = CheckPaths(4,4);
   }
   if(validPaths<2){
     printf("A dead end \n");
-    clearDeadEnd(1,1);
+    clearDeadEnd(4,4);
   }
-  /*
+  //maze[4][4].colVal = 3;
+  */
+  int validPaths = 0;
+  //final check
   for(int i=1;i<20;i++){
     for(int j=1;j<40;j++){
-      int validPaths=0;
-      if(maze[i][j].colVal == 1){
-	CheckPaths(validPaths,i,j);
+      if(maze[i][j].colVal == 1){//is black zone
+	validPaths = CheckPaths(i,j);
       }
-      
+      if(validPaths <2){
+	clearDeadEnd(i,j);
+      }
     }
   }
-  */
+  
   
 }
 //reflect maze
 void Maze::ReflectMaze(){
   //transfer
-  for(int i=0;i<6;i++){
-    for(int j=0;j<12;j++){
+  for(int i=0;i<20;i++){
+    for(int j=0;j<40;j++){
       maze2[i][j] = maze[i][j];
     }
   }
   //reflect
-  for(int i=0;i<3;i++){
-    for(int j=0;j<12;j++){
+  for(int i=0;i<10;i++){
+    for(int j=0;j<40;j++){
       s_maze temp;
       temp =maze[i][j];
-      maze2[i][j] = maze2[5-i][j];
-      maze2[5-i][j] = temp;
+      maze2[i][j] = maze2[19-i][j];
+      maze2[19-i][j] = temp;
     }
   }
+  
 }
 //shuffle
 void Maze::Shuffle(directions dir[]){
@@ -182,8 +246,8 @@ void Maze::CreatePath(int cx,int cy){
   case E:
     {
       if(maze[cx+3][cy].bckDir == W){
-	maze[cx+2][cy].color = GREEN;
-	maze[cx+2][cy+1].color = GREEN;
+	maze[cx+2][cy].color = BLACK;
+	maze[cx+2][cy+1].color = BLACK;
 	
 	maze[cx+2][cy].colVal = 1;
 	maze[cx+2][cy+1].colVal = 1;;
@@ -193,8 +257,8 @@ void Maze::CreatePath(int cx,int cy){
   case S:
     {
       if(maze[cx][cy+3].bckDir == N){
-	maze[cx][cy+2].color =  GREEN;
-	maze[cx+1][cy+2].color = GREEN;
+	maze[cx][cy+2].color =  BLACK;
+	maze[cx+1][cy+2].color = BLACK;
 
 	maze[cx][cy+2].colVal =  1;
 	maze[cx+1][cy+2].colVal = 1;
@@ -203,8 +267,8 @@ void Maze::CreatePath(int cx,int cy){
   case N:
     {
       if(maze[cx][cy-3].bckDir == S){
-	maze[cx][cy-1].color = GREEN;
-	maze[cx+1][cy-1].color = GREEN;
+	maze[cx][cy-1].color = BLACK;
+	maze[cx+1][cy-1].color = BLACK;
 
 	maze[cx][cy-1].colVal = 1;
 	maze[cx+1][cy-1].colVal = 1;
@@ -213,8 +277,8 @@ void Maze::CreatePath(int cx,int cy){
   case W:
     {
       if(maze[cx-3][cy].bckDir == E){
-	maze[cx-1][cy].color = GREEN;
-	maze[cx-1][cy+1].color = GREEN;
+	maze[cx-1][cy].color = BLACK;
+	maze[cx-1][cy+1].color = BLACK;
 
 	maze[cx-1][cy].colVal = 1;
 	maze[cx-1][cy+1].colVal = 1;
@@ -309,7 +373,7 @@ void Maze::InitMaze(){
   //set all block
   for(int i=0;i<20;i++){
     for(int j=0;j<40;j++){
-      maze[i][j].color = GREEN;
+      maze[i][j].color = BLACK;
       maze[i][j].visited =  false;
       maze[i][j].colVal = 1;
     }
@@ -327,7 +391,7 @@ void Maze::InitMaze(){
     for(int j=0;j<20;j++){
       //vert walls
       maze[j][i].color = DARKBLUE;
-      maze[i][j].colVal = 2;//blue value
+      maze[j][i].colVal = 2;//blue value
     }
   }
    
@@ -352,12 +416,20 @@ void Maze::Draw(){
   //draw all box
   for(int i=0;i<20;i++){
     for(int j =0;j<40;j++){
-      DrawRectangle(i*size,j*size,size,size,maze[i][j].color);
-      //DrawRectangle((i+6)*size,j*size,size,size,maze2[i][j].color);
+      Color col;
+      if(maze[i][j].colVal == 1){
+	col = BLACK;
+      }else if(maze[i][j].colVal == 2){
+	col = DARKBLUE;
+      }else{
+	col = RED;
+      }
+      DrawRectangle(i*size,j*size,size,size,col);
+      DrawRectangle((i+20)*size,j*size,size,size,maze2[i][j].color);
     }
   }
   //print grid
-  PrintLine();
+  //PrintLine();
   
   
 }

@@ -68,6 +68,11 @@ public:
   void DeadEndsHorz();//clear horizontal dead ends
   int CheckPaths(int,int);
   void clearDeadEnd(int,int);
+  void CoverBoundry();
+
+  int IsWalkable(int x,int y){
+    return maze[x][y].colVal;
+  }
   
 private:
   s_maze maze[20][40];

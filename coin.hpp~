@@ -1,0 +1,13 @@
+#pragma once
+
+#include"raylib.h"
+#include<iostream>
+
+class Coin{
+public:
+  Coin();
+  ~Coin(){}
+
+private:
+  bool IsEaten;
+};
