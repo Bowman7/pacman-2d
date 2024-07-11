@@ -3,7 +3,7 @@
 #define WIDTH 1000
 #define HEIGHT 1000
 
-#include"grid.hpp"
+#include"grid2.hpp"
 
 int main(){
   //init window

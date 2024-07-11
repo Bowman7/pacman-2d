@@ -20,6 +20,7 @@ struct s_maze{
 
   bool visited;
   Color color;
+  int colVal;//1 green,2 blue
 };
 struct Stack{
   int x;
@@ -50,7 +51,7 @@ public:
     maze[x][y].visited = true;
   }
   void Pop(){
-    printf("pop [%d][%d]\n",stack[top].x,stack[top].y);
+    //printf("pop [%d][%d]\n",stack[top].x,stack[top].y);
     top--;
   }
   bool IsEmpty(){
@@ -61,25 +62,19 @@ public:
   }
   void CheckAvailableDir();
   void PrintDir(directions dir[]);
-  void carveEnding();
-
-  void PushEnd(int x,int y){
-    e_top++;
-    posStack[e_top].x = x;
-    posStack[e_top].y = y;
-  }
-  void carveStart();
- 
-private:
-  int mazeSize = 10;
-  int stackSize = 10;
-  s_maze maze[20][40];
-  Stack stack[200];
+  //reflect maze
+  void ReflectMaze();
+  void PrintLine();
+  void DeadEndsHorz();//clear horizontal dead ends
+  int CheckPaths(int,int);
+  void clearDeadEnd(int,int);
   
-  Stack posStack[200];
+private:
+  s_maze maze[20][40];
+  s_maze maze2[20][40];
+  Stack stack[90];
   
   int top = -1;
-  int e_top =-1;
 
   int size = 25;
 

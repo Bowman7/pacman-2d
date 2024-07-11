@@ -1,18 +1,36 @@
-#include"grid.hpp"
+#include"field.hpp"
 
 Maze::Maze(){
   InitMaze();
   //testMove();
   carvePassage(1,1);
-  //carveEnding();
-  //carveStart();
+  ReflectMaze();
   //SetupPath();
 }
 
 Maze::~Maze(){
 
 }
-
+//reflect maze
+void Maze::ReflectMaze(){
+  //transfer
+  for(int i=0;i<20;i++){
+    for(int j=0;j<40;j++){
+      maze2[i][j] = maze[i][j];
+    }
+  }
+  
+  //reflect
+  for(int i=0;i<20;i++){
+    for(int j=0;j<40;j++){
+      s_maze temp;
+      temp =maze[i][j];
+      maze2[i][j] = maze[19-i][j];
+      maze2[19-i][j] = temp;
+    }
+  }
+  
+}
 //shuffle
 void Maze::Shuffle(directions dir[]){
   std::vector<int>val{0,1,2,3};
@@ -87,7 +105,6 @@ void Maze::PrintDir(directions dir[]){
 //check path and break walls
 void Maze::CreatePath(int cx,int cy){
   printf("path created from :maze[%d][%d]\n",cx,cy);
-  printf("stack top : %d\n",top);
   switch(maze[cx][cy].fwdDir){
   case E:
     {
@@ -128,16 +145,17 @@ void Maze::CheckAvailableDir(){
   if(!foundDir){
     directions dir[4] ={N,S,E,W};
     Shuffle(dir);
-    //PrintDir(dir);
+    PrintDir(dir);
     for(int i=0;i<4;i++){
-      //printf("At pos: maze[%d][%d]\n",stack[top].x,stack[top].y);
-      //std::cout<<"Dir[i] = "<<dir[i]<<std::endl;
+      printf("At pos: maze[%d][%d]\n",stack[top].x,stack[top].y);
+      std::cout<<"Dir[i] = "<<dir[i]<<std::endl;
       int xStep,yStep;
       GetStep(xStep,yStep,dir[i]);
+
       int newX = stack[top].x+xStep;
       int newY = stack[top].y+yStep;
 
-      //printf("next pos: maze[%d][%d]\n",newX,newY);
+      printf("next pos: maze[%d][%d]\n",newX,newY);
 
       if(newX>=0 && newX<20 && newY>=0 && newY<40 && maze[newX][newY].visited== false){
 	maze[stack[top].x][stack[top].y].fwdDir = dir[i];
@@ -147,7 +165,6 @@ void Maze::CheckAvailableDir(){
 	//create path
 	CreatePath(stack[top].x,stack[top].y);
 	Push(newX,newY);
-	PushEnd(newX,newY);
 	CheckAvailableDir();
       }
     }
@@ -164,25 +181,7 @@ void Maze::carvePassage(int cx,int cy){
     
   }
 }
-//carve start
-void Maze::carveStart(){
-   for(int i=0;i<2;i++){
-    //hor color
-    maze[(1)+i][1].color = RED;
-    //vert color
-    maze[(1)+i][(1)+1].color = RED;
-   }
-}
-//carve ending
-void Maze::carveEnding(){
-  printf("end pos: pos[%d][%d]\n",posStack[e_top].x,posStack[e_top].y);
-  for(int i=0;i<2;i++){
-    //hor color
-    maze[(posStack[e_top].x)+i][posStack[e_top].y].color =WHITE;
-    //vert color
-    maze[(posStack[e_top].x)+i][(posStack[e_top].y)+1].color = WHITE;
-  }
-}
+
 //get direction
 directions Maze::GetDirection(){
   std::random_device dev;
@@ -227,10 +226,9 @@ void Maze::InitMaze(){
     for(int j=0;j<40;j++){
       maze[i][j].color = GREEN;
       maze[i][j].visited =  false;
-      maze[i][j].fwdDir =N;
-      maze[i][j].bckDir =N;
     }
   }
+  
   //Walls
   for(int i=0;i<20;i+=3){
     for(int j=0;j<40;j++){
@@ -241,26 +239,32 @@ void Maze::InitMaze(){
   //hor walls
   for(int i=0;i<40;i+=3){
     for(int j=0;j<20;j++){
+      //vert walls
       maze[j][i].color = DARKBLUE;
     }
   }
   
+  
+   
 }
 
 void Maze::Draw(){
+
   //draw all box
   for(int i=0;i<20;i++){
     for(int j =0;j<40;j++){
       DrawRectangle(i*size,j*size,size,size,maze[i][j].color);
+      DrawRectangle((i+20)*size,j*size,size,size,maze2[i][j].color);
     }
   }
-  
   //draw line
-  for(int i=0;i<20;i++){
+  for(int i=0;i<=20;i++){
     //vert
     DrawLine(i*size,0,i*size,40*size,BLACK);
+   
   }
-  for(int i=0;i<40;i++){
+  //hor
+  for(int i=0;i<=40;i++){
     //hor
     DrawLine(0,i*size,20*size,i*size,BLACK);
   }
