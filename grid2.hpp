@@ -27,6 +27,7 @@ struct Stack{
   int y;
 };
 
+
 class Maze{
 public:
   Maze();
@@ -71,16 +72,18 @@ public:
   void CoverBoundry();
 
   int IsWalkable(int x,int y){
-    return maze[x][y].colVal;
+    return f_maze[x][y].colVal;
   }
+
+  void InitFinalMaze();
   
 private:
   s_maze maze[20][40];
   s_maze maze2[20][40];
+  s_maze f_maze[40][40];
   Stack stack[90];
   
   int top = -1;
-
   int size = 25;
 
   
