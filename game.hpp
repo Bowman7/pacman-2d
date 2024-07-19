@@ -23,6 +23,7 @@ struct Pos{
   int heuristic;
   int pathcost;
   int cost;
+  int dir;
 };
 
 class Game{
@@ -45,10 +46,15 @@ public:
   void SortQueue();
   void PrintQueue();
   void PrintFinal();
+  void MoveToEat();
+  bool EventTriggered(double);
 private:
+  //time keep
+  double lastUpdatedTime = 0.0f;
   int count =0;
   //for path finding
   std::vector<Pos> finalStack;
+  std::vector<Pos> ghostPath;
   std::vector<Pos> queue;
   
   Maze maze;

@@ -7,17 +7,52 @@ Game::Game(){
 Game::~Game(){
 
 }
+//time keep
+bool Game::EventTriggered(double time){
+  double currentTime = GetTime();
+  if(currentTime -lastUpdatedTime >= time){
+    lastUpdatedTime = currentTime;
+    return true;
+  }
+  return false;
+  
+}
+//move to eat pacman
+void Game::MoveToEat(){
+  if(!ghostPath.empty()){
+    int size = ghostPath.size()-1;
+    int gx = ghost.GetX();
+    int gy = ghost.GetY();
+    int px = ghostPath[size].x;
+    int py = ghostPath[size].y;
+
+    int diffX = px - gx;
+    int diffY = py - gy;
+    printf(" gx : %d\n",gx);
+    printf(" gy : %d \n",gy);
+    printf(" px : %d\n",px);
+    printf(" py : %d \n",py);
+    printf(" diffx : %d\n",diffX);
+    printf(" diffY : %d \n",diffY);
+    if(diffX <0 && diffY == 0 ){
+      printf("Move left \n");
+      ghost.Move(2);
+    }
+    ghostPath.pop_back();
+  }
+}
 //print final stack
 void Game::PrintFinal(){
+  printf("Final queue: \n");
   for(int i=0;i<finalStack.size();i++){
-    printf(" posx:[%d] posy:[%d] cost[%d]->",finalStack[i].x,finalStack[i].y,finalStack[i].cost);
+    printf(" index:[%d] posx:[%d] posy:[%d] \n",i,finalStack[i].x,finalStack[i].y);
   }
   printf("\n");
 }
 //print queue
 void Game::PrintQueue(){
   for(int i=0;i<queue.size();i++){
-    printf(" posx:[%d] posy:[%d] cost[%d]->",queue[i].x,queue[i].y,queue[i].cost);
+    printf(" pos[%d] cost[%d] \n",i,queue[i].cost);
   }
   printf("\n");
 }
@@ -25,11 +60,11 @@ void Game::PrintQueue(){
 void Game::SortQueue(){
   for(int i=0;i<queue.size();i++){
     for(int j=0;j<queue.size()-i-1;j++){
-      if(queue.at(j).cost < queue.at(j-1).cost){
+      if(queue[j].cost<queue[j+1].cost){
 	Pos temp;
-	temp = queue.at(j);
-	queue.at(j) = queue.at(j+1);
-	queue.at(j+1) = temp;
+	temp = queue[j];
+	queue[j] = queue[j+1];
+	queue[j+1] =temp;
       }
     }
   }
@@ -57,8 +92,9 @@ void Game::CheckPaths(Pos val,int gx,int gy){
     temp.cost = temp.heuristic+temp.pathcost;
     queue.push_back(temp);
     //sort queue acc to cost
-    if(queue.size()>2){
+    if(queue.size()>1){
       //PrintQueue();
+      SortQueue();
     }
     
   }
@@ -72,8 +108,9 @@ void Game::CheckPaths(Pos val,int gx,int gy){
     temp.cost = temp.heuristic+temp.pathcost;
     queue.push_back(temp);
     //sort queue acc to cost
-    if(queue.size()>2){
+    if(queue.size()>1){
       //PrintQueue();
+      SortQueue();
     }
     
   }
@@ -87,8 +124,9 @@ void Game::CheckPaths(Pos val,int gx,int gy){
     temp.cost = temp.heuristic+temp.pathcost;
     queue.push_back(temp);
     //sort queue acc to cost
-    if(queue.size()>2){
+    if(queue.size()>1){
       //PrintQueue();
+      SortQueue();
     }
     
   }
@@ -102,15 +140,16 @@ void Game::CheckPaths(Pos val,int gx,int gy){
     temp.cost = temp.heuristic+temp.pathcost;
     queue.push_back(temp);
     //sort queue acc to cost
-   if(queue.size()>2){
+   if(queue.size()>1){
      //PrintQueue();
+     SortQueue();
    }
   }
 }
 //for path finding
 void Game::FindPath(int x, int y,int gx,int gy){
-  if(abs(gx-x)+abs(gy-y) ==0){
-    return ;
+  if(abs(gx-x)+abs(gy-y) == 0){
+    return;
   }
   //first push the pacman pos
   Pos val;
@@ -123,10 +162,10 @@ void Game::FindPath(int x, int y,int gx,int gy){
   //check NSEW and push into queue
   CheckPaths(val,gx,gy);
  
-  
   //check for new top of queue
-  Pos topQueue = queue[queue.size()];
-  queue.erase(queue.begin());
+  int size = queue.size()-1;
+  Pos topQueue = queue[size];
+  queue.pop_back();
   FindPath(topQueue.x,topQueue.y,gx,gy);
 }
 //eat coin
@@ -207,46 +246,52 @@ int Game::CheckNeighbours(int x,int y){
   
   return 1;
 }
-
 void Game::Update(){
   pac.MoveToDir();
   ghost.MoveToDir();
   CheckCollision();
   EatCoin();
-  //apth finding
+  //empty stack and queue
+  if(!queue.empty()){
+    queue.clear();
+  }
+  if(!finalStack.empty()){
+    finalStack.clear();
+  }
+  //if(queue.)
+  //path finding
   FindPath(pac.GetX(),pac.GetY(),ghost.GetX(),ghost.GetY());
-  //print vals
-  if(count <1){
-    printf("Queue : \n");
-    PrintQueue(); 
-    printf("Final stack: \n");
+  //print path
+  if(count<1){
     PrintFinal();
-    //new pos
-    //finalStack.push_back(queue[0]);
-    //SortQueue();
-    printf("Queue : \n");
-    PrintQueue(); 
     count++;
   }
- 
+  //set ghost path
+  ghostPath = finalStack;
+  //move the ghost
+  MoveToEat();
 }
 void Game::HandleInputs(){
   //n:1,S:2,E:3,W:4
   //north
   if(IsKeyPressed(KEY_W)){
     pac.Move(1);
+    count--;
   }
   //south
   if(IsKeyPressed(KEY_S)){
     pac.Move(2);
+    count--;
   }
   //east
   if(IsKeyPressed(KEY_D)){
     pac.Move(3);
+    count--;
   }
   //west
   if(IsKeyPressed(KEY_A)){
     pac.Move(4);
+    count--;
   }
   //FOR GHOST
   if(IsKeyPressed(KEY_UP)){
