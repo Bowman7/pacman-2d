@@ -34,8 +34,24 @@ void Game::MoveToEat(){
     printf(" py : %d \n",py);
     printf(" diffx : %d\n",diffX);
     printf(" diffY : %d \n",diffY);
+    //east
+    if(diffX >0 && diffY == 0 ){
+      printf("Move right \n");
+      ghost.Move(3);
+    }
+    //west
     if(diffX <0 && diffY == 0 ){
       printf("Move left \n");
+      ghost.Move(4);
+    }
+    //north
+    if(diffX == 0 && diffY<0){
+      printf("move north\n");
+      ghost.Move(1);
+    }
+    //south
+    if(diffX == 0 && diffY>0){
+      printf("move south\n");
       ghost.Move(2);
     }
     ghostPath.pop_back();
@@ -58,9 +74,10 @@ void Game::PrintQueue(){
 }
 //sort queue
 void Game::SortQueue(){
-  for(int i=0;i<queue.size();i++){
-    for(int j=0;j<queue.size()-i-1;j++){
-      if(queue[j].cost<queue[j+1].cost){
+  int size = queue.size();
+  for(int i=0;i<size-1;i++){
+    for(int j=0;j<size-i-1;j++){
+      if(queue[j].cost>queue[j+1].cost){
 	Pos temp;
 	temp = queue[j];
 	queue[j] = queue[j+1];
@@ -92,7 +109,7 @@ void Game::CheckPaths(Pos val,int gx,int gy){
     temp.cost = temp.heuristic+temp.pathcost;
     queue.push_back(temp);
     //sort queue acc to cost
-    if(queue.size()>1){
+    if(queue.size()>2){
       //PrintQueue();
       SortQueue();
     }
@@ -108,7 +125,7 @@ void Game::CheckPaths(Pos val,int gx,int gy){
     temp.cost = temp.heuristic+temp.pathcost;
     queue.push_back(temp);
     //sort queue acc to cost
-    if(queue.size()>1){
+    if(queue.size()>2){
       //PrintQueue();
       SortQueue();
     }
@@ -124,7 +141,7 @@ void Game::CheckPaths(Pos val,int gx,int gy){
     temp.cost = temp.heuristic+temp.pathcost;
     queue.push_back(temp);
     //sort queue acc to cost
-    if(queue.size()>1){
+    if(queue.size()>2){
       //PrintQueue();
       SortQueue();
     }
@@ -140,7 +157,7 @@ void Game::CheckPaths(Pos val,int gx,int gy){
     temp.cost = temp.heuristic+temp.pathcost;
     queue.push_back(temp);
     //sort queue acc to cost
-   if(queue.size()>1){
+   if(queue.size()>2){
      //PrintQueue();
      SortQueue();
    }
@@ -163,9 +180,8 @@ void Game::FindPath(int x, int y,int gx,int gy){
   CheckPaths(val,gx,gy);
  
   //check for new top of queue
-  int size = queue.size()-1;
-  Pos topQueue = queue[size];
-  queue.pop_back();
+  Pos topQueue = queue[0];
+  queue.erase(queue.begin());
   FindPath(topQueue.x,topQueue.y,gx,gy);
 }
 //eat coin
@@ -249,6 +265,7 @@ int Game::CheckNeighbours(int x,int y){
 void Game::Update(){
   pac.MoveToDir();
   ghost.MoveToDir();
+  
   CheckCollision();
   EatCoin();
   //empty stack and queue
@@ -258,40 +275,56 @@ void Game::Update(){
   if(!finalStack.empty()){
     finalStack.clear();
   }
-  //if(queue.)
-  //path finding
-  FindPath(pac.GetX(),pac.GetY(),ghost.GetX(),ghost.GetY());
-  //print path
-  if(count<1){
-    PrintFinal();
-    count++;
+  //for ghost
+  if(EventTriggered(0.2)){
+    //first empty ghost path
+    if(!ghostPath.empty()){
+      ghostPath.clear();
+    }
+    //path finding
+    FindPath(pac.GetX(),pac.GetY(),ghost.GetX(),ghost.GetY());
+    
+    //print path
+    if(count<1){
+      PrintFinal();
+      count++;
+    }
+    //set ghost path
+    ghostPath = finalStack;
   }
-  //set ghost path
-  ghostPath = finalStack;
   //move the ghost
   MoveToEat();
+  
 }
 void Game::HandleInputs(){
   //n:1,S:2,E:3,W:4
   //north
   if(IsKeyPressed(KEY_W)){
-    pac.Move(1);
-    count--;
+    if(IsValidPath(pac.GetX(),pac.GetY()-1)){
+      pac.Move(1);
+      count--;
+    }
   }
   //south
   if(IsKeyPressed(KEY_S)){
-    pac.Move(2);
-    count--;
+    if(IsValidPath(pac.GetX(),pac.GetY()+1)){
+      pac.Move(2);
+      count--;
+    }
   }
   //east
   if(IsKeyPressed(KEY_D)){
-    pac.Move(3);
-    count--;
+    if(IsValidPath(pac.GetX()+1,pac.GetY())){
+      pac.Move(3);
+      count--;
+    }
   }
   //west
   if(IsKeyPressed(KEY_A)){
+    if(IsValidPath(pac.GetX()-1,pac.GetY())){
     pac.Move(4);
     count--;
+    }
   }
   //FOR GHOST
   if(IsKeyPressed(KEY_UP)){

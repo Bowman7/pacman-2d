@@ -13,7 +13,7 @@ std::vector<Pos> queue;
 void SortQueue(){
   for(int i=0;i<queue.size();i++){
     for(int j=0;j<queue.size()-i-1;j++){
-      if(queue[j].cost < queue[j+1].cost){
+      if(queue[j].cost > queue[j+1].cost){
 	Pos temp;
 	temp = queue[j];
 	queue[j] = queue[j+1];
@@ -38,7 +38,13 @@ int main(){
   }
   PrintQueue();
   SortQueue();
+  printf("Sorted \n");
   PrintQueue();
+  printf("remove 1st element \n");
+  queue.erase(queue.begin());
+  queue.erase(queue.begin());
+  PrintQueue();
+  /*
   int size = queue.size()-1;
   printf("Top of queue : pos[%d] cost[%d]\n",size,queue[size].cost);
   Pos topQueu = queue[size];
@@ -53,6 +59,7 @@ int main(){
   if(queue.empty()){
     printf("Empty\n");
   }
+  */
   return 0;
   
 }
