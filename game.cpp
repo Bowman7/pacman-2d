@@ -19,43 +19,39 @@ bool Game::EventTriggered(double time){
 }
 //move to eat pacman
 void Game::MoveToEat(){
-  if(!ghostPath.empty()){
-    int size = ghostPath.size()-1;
     int gx = ghost.GetX();
     int gy = ghost.GetY();
-    int px = ghostPath[size].x;
-    int py = ghostPath[size].y;
+    int px = ghostPath.x;
+    int py = ghostPath.y;
 
     int diffX = px - gx;
     int diffY = py - gy;
-    printf(" gx : %d\n",gx);
-    printf(" gy : %d \n",gy);
-    printf(" px : %d\n",px);
-    printf(" py : %d \n",py);
-    printf(" diffx : %d\n",diffX);
-    printf(" diffY : %d \n",diffY);
+    //printf(" gx : %d\n",gx);
+    //printf(" gy : %d \n",gy);
+    //printf(" px : %d\n",px);
+    //printf(" py : %d \n",py);
+    //printf(" diffx : %d\n",diffX);
+    //printf(" diffY : %d \n",diffY);
     //east
     if(diffX >0 && diffY == 0 ){
-      printf("Move right \n");
+      printf("ghost Move right \n");
       ghost.Move(3);
     }
     //west
     if(diffX <0 && diffY == 0 ){
-      printf("Move left \n");
+      printf("ghost Move left \n");
       ghost.Move(4);
     }
     //north
     if(diffX == 0 && diffY<0){
-      printf("move north\n");
+      printf("ghost move north\n");
       ghost.Move(1);
     }
     //south
     if(diffX == 0 && diffY>0){
-      printf("move south\n");
+      printf("ghost move south\n");
       ghost.Move(2);
     }
-    ghostPath.pop_back();
-  }
 }
 //print final stack
 void Game::PrintFinal(){
@@ -67,17 +63,20 @@ void Game::PrintFinal(){
 }
 //print queue
 void Game::PrintQueue(){
+  printf("Queue: \n");
   for(int i=0;i<queue.size();i++){
-    printf(" pos[%d] cost[%d] \n",i,queue[i].cost);
+    printf(" index:[%d] posx:[%d] posy:[%d] cost[%d] \n",i,queue[i].x,
+	   queue[i].y,queue[i].cost);
   }
   printf("\n");
 }
 //sort queue
 void Game::SortQueue(){
   int size = queue.size();
+  
   for(int i=0;i<size-1;i++){
     for(int j=0;j<size-i-1;j++){
-      if(queue[j].cost>queue[j+1].cost){
+      if(queue[j].cost > queue[j+1].cost){
 	Pos temp;
 	temp = queue[j];
 	queue[j] = queue[j+1];
@@ -113,6 +112,7 @@ void Game::CheckPaths(Pos val,int gx,int gy){
       //PrintQueue();
       SortQueue();
     }
+
     
   }
   //for south
@@ -128,6 +128,7 @@ void Game::CheckPaths(Pos val,int gx,int gy){
     if(queue.size()>2){
       //PrintQueue();
       SortQueue();
+    
     }
     
   }
@@ -144,8 +145,8 @@ void Game::CheckPaths(Pos val,int gx,int gy){
     if(queue.size()>2){
       //PrintQueue();
       SortQueue();
+     
     }
-    
   }
   //for west
   if(IsValidPath(val.x-1,val.y)){
@@ -160,11 +161,12 @@ void Game::CheckPaths(Pos val,int gx,int gy){
    if(queue.size()>2){
      //PrintQueue();
      SortQueue();
+    
    }
   }
 }
 //for path finding
-void Game::FindPath(int x, int y,int gx,int gy){
+void Game::FindPath(int x, int y,int gx,int gy){ 
   if(abs(gx-x)+abs(gy-y) == 0){
     return;
   }
@@ -173,16 +175,17 @@ void Game::FindPath(int x, int y,int gx,int gy){
   val.x =x;
   val.y = y;
   val.heuristic = abs(gx-x)+abs(gy-y);
-  val.pathcost = 0;
+  val.pathcost = 1;
   val.cost = val.heuristic + val.pathcost;
   finalStack.push_back(val);
   //check NSEW and push into queue
   CheckPaths(val,gx,gy);
- 
   //check for new top of queue
-  Pos topQueue = queue[0];
-  queue.erase(queue.begin());
-  FindPath(topQueue.x,topQueue.y,gx,gy);
+  if(!queue.empty()){
+    Pos topQueue = queue[0];
+    queue.erase(queue.begin());
+    FindPath(topQueue.x,topQueue.y,gx,gy);
+  }  
 }
 //eat coin
 void Game::EatCoin(){
@@ -262,37 +265,43 @@ int Game::CheckNeighbours(int x,int y){
   
   return 1;
 }
+
 void Game::Update(){
+  //check if ghost reached wall
+  if(ghost.GetX() == 39 && ghost.GetY() == 2){
+    ghost.SetHuntMode();
+  }
+  //pacmove
   pac.MoveToDir();
-  ghost.MoveToDir();
-  
   CheckCollision();
   EatCoin();
-  //empty stack and queue
+  
+  ghost.MoveToDir();
+  
   if(!queue.empty()){
     queue.clear();
   }
+  //clear finalstack
   if(!finalStack.empty()){
     finalStack.clear();
   }
-  //for ghost
-  if(EventTriggered(0.2)){
-    //first empty ghost path
-    if(!ghostPath.empty()){
-      ghostPath.clear();
-    }
-    //path finding
-    FindPath(pac.GetX(),pac.GetY(),ghost.GetX(),ghost.GetY());
-    
-    //print path
-    if(count<1){
-      PrintFinal();
-      count++;
-    }
-    //set ghost path
-    ghostPath = finalStack;
+  if(ghost.GetMode()==0){
+    FindPath(39,2,ghost.GetX(),ghost.GetY());
+    int size = finalStack.size();
+    ghostPath = finalStack[size-1];
   }
-  //move the ghost
+  if(ghost.GetMode()==1){
+    FindPath(pac.GetX(),pac.GetY(),ghost.GetX(),ghost.GetY());
+    int size = finalStack.size();
+    ghostPath = finalStack[size-1];
+  }
+  //print path
+  if(count<1){
+    PrintQueue();
+    PrintFinal();
+    count++;
+  }
+  //ghost movement
   MoveToEat();
   
 }

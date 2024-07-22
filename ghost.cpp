@@ -2,6 +2,7 @@
 
 Ghost::Ghost(){
   InitGhost();
+  mode = 0;
 }
 
 Ghost::~Ghost(){

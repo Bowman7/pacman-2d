@@ -52,10 +52,12 @@ private:
   //time keep
   double lastUpdatedTime = 0.0f;
   int count =0;
+  int qcount = 0;
   //for path finding
   std::vector<Pos> finalStack;
-  std::vector<Pos> ghostPath;
+  Pos ghostPath;
   std::vector<Pos> queue;
+  bool findGhostPath =true;
   
   Maze maze;
   Coin coin[40][40];

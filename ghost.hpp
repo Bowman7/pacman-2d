@@ -62,9 +62,19 @@ public:
   void RevertWest(){
     x+=1;
   }
- 
+
+  int GetMode(){
+    return mode;
+  }
+  void SetScatterMode(){
+    mode =0;
+  }
+  void SetHuntMode(){
+    mode =1;
+  }
   
 private:
+  int mode;//0:scatter,1:chase,2:run
   int x;
   int y;
   g_direction dir;
