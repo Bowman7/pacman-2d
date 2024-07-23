@@ -1,6 +1,7 @@
 #include<iostream>
 #include<vector>
 #include<stdio.h>
+#include<random>
 
 struct Pos{
   int x;
@@ -30,6 +31,13 @@ void PrintQueue(){
   }
   printf("\n");
 }
+int GetRandomNum(){
+  std::random_device dev;
+  std::mt19937 rng(dev());
+  std::uniform_int_distribution<std::mt19937::result_type> dist6(0,3);
+  int random = dist6(rng);
+  return random;
+}
 int main(){
   
   for(int i=0;i<5;i++){
@@ -44,14 +52,15 @@ int main(){
   printf("Sorted \n");
   PrintQueue();
 
-  Pos top = queue.begin();
-  //top.x = queue[0].x;
-  //top.y = queue[0].y;
-  //top.cost =queue[0].cost;
-  printf("Top queue: posx[%d] posy[%d] cost[%d] \n",
-	 top.x,top.y,top.cost
-	 );
+  int size = queue.size();
+  int px = queue[size-1].x;
+  int py = queue[size-1].y;
+  int cost = queue[size-1].cost;
 
+  printf("PX: %d PY: %d cost: %d\n",px,py,cost);
+  //get rand num
+  int num = GetRandomNum();
+  printf("Num: %d\n",num);
  
   /*
   int size = queue.size()-1;

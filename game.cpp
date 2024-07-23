@@ -19,19 +19,15 @@ bool Game::EventTriggered(double time){
 }
 //move to eat pacman
 void Game::MoveToEat(){
+  if(!finalStack.empty()){
+    int size = finalStack.size();
     int gx = ghost.GetX();
     int gy = ghost.GetY();
-    int px = ghostPath.x;
-    int py = ghostPath.y;
-
+    int px = finalStack[size-1].x;
+    int py = finalStack[size-1].y;
+    
     int diffX = px - gx;
     int diffY = py - gy;
-    //printf(" gx : %d\n",gx);
-    //printf(" gy : %d \n",gy);
-    //printf(" px : %d\n",px);
-    //printf(" py : %d \n",py);
-    //printf(" diffx : %d\n",diffX);
-    //printf(" diffY : %d \n",diffY);
     //east
     if(diffX >0 && diffY == 0 ){
       printf("ghost Move right \n");
@@ -52,6 +48,11 @@ void Game::MoveToEat(){
       printf("ghost move south\n");
       ghost.Move(2);
     }
+    finalStack.pop_back();
+  }
+  if(finalStack.empty()){
+   
+  }
 }
 //print final stack
 void Game::PrintFinal(){
@@ -73,8 +74,7 @@ void Game::PrintQueue(){
 //sort queue
 void Game::SortQueue(){
   int size = queue.size();
-  
-  for(int i=0;i<size-1;i++){
+  for(int i=0;i<size;i++){
     for(int j=0;j<size-i-1;j++){
       if(queue[j].cost > queue[j+1].cost){
 	Pos temp;
@@ -168,6 +168,7 @@ void Game::CheckPaths(Pos val,int gx,int gy){
 //for path finding
 void Game::FindPath(int x, int y,int gx,int gy){ 
   if(abs(gx-x)+abs(gy-y) == 0){
+    printf("FIND PATH COMPLETE !!!\n");
     return;
   }
   //first push the pacman pos
@@ -224,13 +225,13 @@ void Game::CheckCollision(){
      maze.IsWalkable(ghost.GetX(),ghost.GetY()) == 2
      ){
     switch(ghost.GetDir()){
-    case 1:
+    case 0:
       ghost.RevertNorth();break;
-    case 2:
+    case 1:
       ghost.RevertSouth();break;
-    case 3:
+    case 2:
       ghost.RevertEast();break;
-    case 4:
+    case 3:
       ghost.RevertWest();break;
     }
   }
@@ -265,35 +266,124 @@ int Game::CheckNeighbours(int x,int y){
   
   return 1;
 }
+//get rand num
+int Game::GetRandomNum(){
+  std::random_device dev;
+  std::mt19937 rng(dev());
+  std::uniform_int_distribution<std::mt19937::result_type> dist6(0,3);
+  int random = dist6(rng);
+  return random;
+}
 
-void Game::Update(){
-  //check if ghost reached wall
-  if(ghost.GetX() == 39 && ghost.GetY() == 2){
-    ghost.SetHuntMode();
+//check is next dir is valid
+bool Game::IsNextDirValid(int val){
+  //north
+  if(val == 0){
+    if(IsValidPath(ghost.GetX(),ghost.GetY()-1)){
+      return true;
+    }
   }
+  //south
+  if(val == 1){
+    if(IsValidPath(ghost.GetX(),ghost.GetY()+1)){
+      return true;
+    }
+  }
+  //east
+  if(val == 2){
+    if(IsValidPath(ghost.GetX()+1,ghost.GetY())){
+      return true;
+    }
+  }
+  //west
+  if(val == 3){
+    if(IsValidPath(ghost.GetX()-1,ghost.GetY())){
+      return true;
+    }
+  }
+  return false;
+}
+int Game::GetNum(){
+  int num;
+  num = GetRandomNum();
+  if(ghost.CheckPreviousDir(num)){
+    num = GetRandomNum();
+  }
+  //check if valid path
+  if(IsNextDirValid(num)){
+    return num;
+  }
+  return GetNum();
+}
+//ghost hits wall
+bool Game::GhostHitWall(){
+  switch(ghost.GetDir()){
+  case 0:
+    {//north
+      if(!IsValidPath(ghost.GetX(),ghost.GetY()-1)){
+	printf("Hits north wall\n");
+	return true;
+      }
+    }break;
+  case 1:
+    {//south
+      if(!IsValidPath(ghost.GetX(),ghost.GetY()+1)){
+	printf("Hits south wall\n");
+	return true;
+      }
+    }break;
+  case 2:
+    {//east
+      if(!IsValidPath(ghost.GetX()+1,ghost.GetY())){
+	printf("Hits east wall\n");
+	return true;
+      }
+    }break;
+  case 3:
+    {//west
+      if(!IsValidPath(ghost.GetX()-1,ghost.GetY())){
+	printf("Hits west wall\n");
+	return true;
+      }
+    }break;
+  default:
+    return false;
+  }
+
+  return false;
+}
+
+//roam ghost
+void Game::RoamGhost(){
+  int num = GetNum();
+  printf("Num of roam ghost: %d \n",num);
+  ghost.SetPrevDir();
+  ghost.Move(num);
+}
+//ghost scatter mode
+void Game::GhostScatter(){
+  if(GhostHitWall() || EventTriggered(3)){
+    printf("Ghost hit wall\n");
+    RoamGhost();
+  }
+  ghost.MoveToDir();
+  
+}
+void Game::Update(){
+  
   //pacmove
   pac.MoveToDir();
+
+  if(ghostMode == 0){
+    GhostScatter();
+  }
+  
   CheckCollision();
   EatCoin();
   
-  ghost.MoveToDir();
-  
-  if(!queue.empty()){
-    queue.clear();
-  }
-  //clear finalstack
+  /*
   if(!finalStack.empty()){
-    finalStack.clear();
-  }
-  if(ghost.GetMode()==0){
-    FindPath(39,2,ghost.GetX(),ghost.GetY());
-    int size = finalStack.size();
-    ghostPath = finalStack[size-1];
-  }
-  if(ghost.GetMode()==1){
-    FindPath(pac.GetX(),pac.GetY(),ghost.GetX(),ghost.GetY());
-    int size = finalStack.size();
-    ghostPath = finalStack[size-1];
+  ghost.MoveToDir();
   }
   //print path
   if(count<1){
@@ -301,8 +391,12 @@ void Game::Update(){
     PrintFinal();
     count++;
   }
-  //ghost movement
-  MoveToEat();
+
+  if(pathFound){
+    //ghost movement
+    MoveToEat();
+  }
+  */
   
 }
 void Game::HandleInputs(){
@@ -321,6 +415,7 @@ void Game::HandleInputs(){
       count--;
     }
   }
+  
   //east
   if(IsKeyPressed(KEY_D)){
     if(IsValidPath(pac.GetX()+1,pac.GetY())){
@@ -331,25 +426,25 @@ void Game::HandleInputs(){
   //west
   if(IsKeyPressed(KEY_A)){
     if(IsValidPath(pac.GetX()-1,pac.GetY())){
-    pac.Move(4);
-    count--;
+      pac.Move(4);
+      count--;
     }
   }
   //FOR GHOST
   if(IsKeyPressed(KEY_UP)){
-    ghost.Move(1);
+    ghost.Move(0);
   }
   //south
   if(IsKeyPressed(KEY_DOWN)){
-    ghost.Move(2);
+    ghost.Move(1);
   }
   //east
   if(IsKeyPressed(KEY_RIGHT)){
-    ghost.Move(3);
+    ghost.Move(2);
   }
   //west
   if(IsKeyPressed(KEY_LEFT)){
-    ghost.Move(4);
+    ghost.Move(3);
   }
 }
 

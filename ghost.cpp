@@ -2,7 +2,7 @@
 
 Ghost::Ghost(){
   InitGhost();
-  mode = 0;
+  mode = 1;
 }
 
 Ghost::~Ghost(){
@@ -21,14 +21,14 @@ bool Ghost::EventTriggered(double time){
 //move
 void Ghost::Move(int val){
   switch(val){
+  case 0:
+    currentDir = gn;break;
   case 1:
-    dir = gn;break;
+    currentDir = gs;break;
   case 2:
-    dir = gs;break;
+    currentDir = ge;break;
   case 3:
-    dir = ge;break;
-  case 4:
-    dir = gw;break;
+    currentDir = gw;break;
   default:
     break;
   }
@@ -36,7 +36,7 @@ void Ghost::Move(int val){
 //moving
 void Ghost::MoveToDir(){
   if(EventTriggered(0.1)){
-    switch(dir){
+    switch(currentDir){
     case gn:
       y--;break;
     case gs:
@@ -53,7 +53,7 @@ void Ghost::MoveToDir(){
 //init pacman
 void Ghost::InitGhost(){
   x =10;
-  y =2;
+  y =20;
 }
 
 //draw pacman

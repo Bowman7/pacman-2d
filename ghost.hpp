@@ -35,15 +35,15 @@ public:
     this->y = y;
   }
   int GetDir(){
-    switch(dir){
+    switch(currentDir){
     case gn:
-      return 1;break;
+      return 0;break;
     case gs:
-      return 2;break;
+      return 1;break;
     case ge:
-      return 3;break;
+      return 2;break;
     case gw:
-      return 4;break;
+      return 3;break;
     default:
       break;
     }
@@ -72,8 +72,33 @@ public:
   void SetHuntMode(){
     mode =1;
   }
+  bool CheckPreviousDir(int val){
+    g_direction valDir;
+    switch(val){
+    case 0:
+      valDir = gn;break;
+    case 1:
+      valDir = gs;break;
+    case 2:
+      valDir = ge;break;
+    case 3:
+      valDir = gw;break;
+    }
+    //now check val
+    if(valDir == previousDir){
+      return true;
+    }
+    return false;
+    
+  }
+  void SetPrevDir(){
+    previousDir = currentDir;
+  }
   
 private:
+  g_direction currentDir = gw;
+  g_direction previousDir = ge;
+  
   int mode;//0:scatter,1:chase,2:run
   int x;
   int y;

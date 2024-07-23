@@ -57,7 +57,17 @@ public:
   void RevertWest(){
     x+=1;
   }
+  bool IsMoving(){
+    return moving;
+  }
+  void SetNotMoving(){
+    moving = false;
+  }
+  void SetMoving(){
+    moving = true;
+  }
 private:
+  bool moving =false;
   int x;
   int y;
   int lives;

@@ -5,6 +5,7 @@
 #include<vector>
 #include<cmath>
 #include<stdio.h>
+#include<random>
 
 #include"grid2.hpp"
 #include"pac.hpp"
@@ -48,16 +49,24 @@ public:
   void PrintFinal();
   void MoveToEat();
   bool EventTriggered(double);
+  void RoamGhost();
+  int GetRandomNum();
+  int GetNum();
+  bool IsNextDirValid(int);
+  bool GhostHitWall();
+  void GhostScatter();
 private:
+  //ghost mode 0:scatter 1:atk
+  int ghostMode = 0;
+  
   //time keep
   double lastUpdatedTime = 0.0f;
   int count =0;
   int qcount = 0;
   //for path finding
   std::vector<Pos> finalStack;
-  Pos ghostPath;
   std::vector<Pos> queue;
-  bool findGhostPath =true;
+  //bool findGhostPath =true;
   
   Maze maze;
   Coin coin[40][40];
