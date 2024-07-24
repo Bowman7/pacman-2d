@@ -2,7 +2,6 @@
 
 Ghost::Ghost(){
   InitGhost();
-  mode = 1;
 }
 
 Ghost::~Ghost(){
@@ -22,13 +21,13 @@ bool Ghost::EventTriggered(double time){
 void Ghost::Move(int val){
   switch(val){
   case 0:
-    currentDir = gn;break;
+    dir = gn;break;
   case 1:
-    currentDir = gs;break;
+    dir = gs;break;
   case 2:
-    currentDir = ge;break;
+    dir = ge;break;
   case 3:
-    currentDir = gw;break;
+    dir = gw;break;
   default:
     break;
   }
@@ -36,7 +35,7 @@ void Ghost::Move(int val){
 //moving
 void Ghost::MoveToDir(){
   if(EventTriggered(0.1)){
-    switch(currentDir){
+    switch(dir){
     case gn:
       y--;break;
     case gs:

@@ -303,16 +303,38 @@ bool Game::IsNextDirValid(int val){
   }
   return false;
 }
+//check bounce back dir
+bool Game::NoBounceback(int val){
+  //north
+  if(ghost.GetDir()==0 && val==1){
+    return false;
+  }
+  //south
+  if(ghost.GetDir()==1 && val==0){
+    return false;
+  }
+  //east
+  if(ghost.GetDir()==2 && val == 3){
+    return false;
+  }
+  //west
+  if(ghost.GetDir()==3 && val==2){
+    return false;
+  }
+  return true;
+  
+}
 int Game::GetNum(){
   int num;
   num = GetRandomNum();
-  if(ghost.CheckPreviousDir(num)){
-    num = GetRandomNum();
+  if(NoBounceback(num)){
+    printf("No bounce back\n");
+    //check if valid path
+    if(IsNextDirValid(num)){
+      return num;
+    }
   }
-  //check if valid path
-  if(IsNextDirValid(num)){
-    return num;
-  }
+  
   return GetNum();
 }
 //ghost hits wall
@@ -356,14 +378,15 @@ bool Game::GhostHitWall(){
 //roam ghost
 void Game::RoamGhost(){
   int num = GetNum();
-  printf("Num of roam ghost: %d \n",num);
-  ghost.SetPrevDir();
+
+  printf("Num generated: %d\n",num);
+  printf("Ghost current dir: %d\n",ghost.GetDir());
   ghost.Move(num);
 }
 //ghost scatter mode
 void Game::GhostScatter(){
-  if(GhostHitWall() || EventTriggered(3)){
-    printf("Ghost hit wall\n");
+  if(GhostHitWall() || EventTriggered(2)){
+    printf("\nGhost hit wall\n");
     RoamGhost();
   }
   ghost.MoveToDir();

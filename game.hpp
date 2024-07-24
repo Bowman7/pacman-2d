@@ -55,6 +55,7 @@ public:
   bool IsNextDirValid(int);
   bool GhostHitWall();
   void GhostScatter();
+  bool NoBounceback(int);
 private:
   //ghost mode 0:scatter 1:atk
   int ghostMode = 0;
