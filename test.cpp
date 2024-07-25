@@ -51,16 +51,13 @@ int main(){
   SortQueue();
   printf("Sorted \n");
   PrintQueue();
-
-  int size = queue.size();
-  int px = queue[size-1].x;
-  int py = queue[size-1].y;
-  int cost = queue[size-1].cost;
-
-  printf("PX: %d PY: %d cost: %d\n",px,py,cost);
-  //get rand num
-  int num = GetRandomNum();
-  printf("Num: %d\n",num);
+  Pos val;
+  val.x =1000;
+  val.y =1000;
+  val.cost =9000;
+  queue.push_back(val);
+  PrintQueue();
+  
  
   /*
   int size = queue.size()-1;

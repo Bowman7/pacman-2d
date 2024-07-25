@@ -42,7 +42,7 @@ public:
   
   //func to find thepath
   void FindPath(int,int,int,int);
-  void CheckPaths(Pos,int,int);
+  void CheckPaths(int,int,int,int);
   bool IsValidPath(int,int);
   void SortQueue();
   void PrintQueue();
@@ -56,12 +56,22 @@ public:
   bool GhostHitWall();
   void GhostScatter();
   bool NoBounceback(int);
+  bool IsPacNear();
+  void HuntPacman();
+  bool ModeTriggered(double);
+  bool InFinalStack(int,int);
+  bool IsOneDiff(int,int);
+  bool InQueue(int,int);
 private:
   //ghost mode 0:scatter 1:atk
-  int ghostMode = 0;
-  
+  //bool ghostDestReached = false;
+  int pacDist;
+  int ghostMode = 1;
+  bool pathFound = false;
   //time keep
   double lastUpdatedTime = 0.0f;
+  double ghostModeChange  =0.0f;
+ 
   int count =0;
   int qcount = 0;
   //for path finding

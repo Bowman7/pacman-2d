@@ -1,0 +1,18 @@
+#include<stdio.h>
+#include<iostream>
+
+
+void InitMaze(int maze[40][40]){
+  for(int =0;i<40;i++){
+    for(int j=0;j<40;j++){
+      maze[i][j] = 0;
+    }
+  }
+}
+void main(){
+
+  int maze[40][40];
+  InitMaze(maze);
+  
+  return 0;
+}

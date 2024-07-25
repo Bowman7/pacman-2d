@@ -2,6 +2,7 @@
 
 Game::Game(){
   InitCoin();
+  
 }
 
 Game::~Game(){
@@ -17,48 +18,13 @@ bool Game::EventTriggered(double time){
   return false;
   
 }
-//move to eat pacman
-void Game::MoveToEat(){
-  if(!finalStack.empty()){
-    int size = finalStack.size();
-    int gx = ghost.GetX();
-    int gy = ghost.GetY();
-    int px = finalStack[size-1].x;
-    int py = finalStack[size-1].y;
-    
-    int diffX = px - gx;
-    int diffY = py - gy;
-    //east
-    if(diffX >0 && diffY == 0 ){
-      printf("ghost Move right \n");
-      ghost.Move(3);
-    }
-    //west
-    if(diffX <0 && diffY == 0 ){
-      printf("ghost Move left \n");
-      ghost.Move(4);
-    }
-    //north
-    if(diffX == 0 && diffY<0){
-      printf("ghost move north\n");
-      ghost.Move(1);
-    }
-    //south
-    if(diffX == 0 && diffY>0){
-      printf("ghost move south\n");
-      ghost.Move(2);
-    }
-    finalStack.pop_back();
-  }
-  if(finalStack.empty()){
-   
-  }
-}
+
 //print final stack
 void Game::PrintFinal(){
-  printf("Final queue: \n");
+  printf("Final Stack: \n");
   for(int i=0;i<finalStack.size();i++){
-    printf(" index:[%d] posx:[%d] posy:[%d] \n",i,finalStack[i].x,finalStack[i].y);
+    printf(" index:[%d] posx:[%d] posy:[%d] cost: %d\n",i,
+	   finalStack[i].x,finalStack[i].y,finalStack[i].cost);
   }
   printf("\n");
 }
@@ -73,6 +39,9 @@ void Game::PrintQueue(){
 }
 //sort queue
 void Game::SortQueue(){
+  printf("Sort queue \n");
+  printf("Queue before sort\n");
+  PrintQueue();
   int size = queue.size();
   for(int i=0;i<size;i++){
     for(int j=0;j<size-i-1;j++){
@@ -84,6 +53,8 @@ void Game::SortQueue(){
       }
     }
   }
+  printf("Queue after sort");
+  PrintQueue();
 }
 //check if path is valid
 bool Game::IsValidPath(int x, int y){
@@ -96,91 +67,145 @@ bool Game::IsValidPath(int x, int y){
    }
    return false;
 }
-//check paths
-void Game::CheckPaths(Pos val,int gx,int gy){
-  //for north
-  if(IsValidPath(val.x,val.y-1)){
-    Pos temp;
-    temp.x = val.x;
-    temp.y = val.y-1;
-    temp.heuristic = abs(gx-temp.x)+abs(gy-temp.y);
-    temp.pathcost = 1;
-    temp.cost = temp.heuristic+temp.pathcost;
-    queue.push_back(temp);
-    //sort queue acc to cost
-    if(queue.size()>2){
-      //PrintQueue();
-      SortQueue();
+//check if it is alredy in finalstack
+bool Game::InFinalStack(int x,int y){
+  for(int i=0;i<finalStack.size();i++){
+    if(finalStack[i].x == x && finalStack[i].y == y){
+      return true;
     }
-
+  }
+  return false;
+}
+//check if it is already in queue
+bool Game::InQueue(int x,int y){
+  for(int i=0;i<queue.size();i++){
+    if(queue[i].x == x && queue[i].y == y){
+      return true;
+    }
+  }
+  return false;
+}
+//check paths
+void Game::CheckPaths(int x,int y,int gx,int gy){
+  
+  //for north
+  int nx = x;
+  int ny = y-1;
+  if(IsValidPath(nx,ny)){
+    Pos temp;
+    temp.x = nx;
+    temp.y = ny;
+    int heu = abs(gx-nx)+abs(gy-ny);
+    int cost = 1+ heu;
+    temp.heuristic = heu;
+    temp.pathcost = 1;
+    temp.cost = cost;
+    if(!InFinalStack(nx,ny) && !InQueue(nx,ny)){
+      queue.push_back(temp);
+    }
     
   }
   //for south
-  if(IsValidPath(val.x,val.y+1)){
+  int sx =x;
+  int sy = y+1;
+  if(IsValidPath(sx,sy)){
     Pos temp;
-    temp.x = val.x;
-    temp.y = val.y+1;
-    temp.heuristic = abs(gx-temp.x)+abs(gy-temp.y);
+    temp.x = sx;
+    temp.y = sy;
+    int heu = abs(gx-sx)+abs(gy-sy);
+    int cost = 1+ heu;
+    temp.heuristic = heu;
     temp.pathcost = 1;
-    temp.cost = temp.heuristic+temp.pathcost;
-    queue.push_back(temp);
-    //sort queue acc to cost
-    if(queue.size()>2){
-      //PrintQueue();
-      SortQueue();
-    
+    temp.cost = cost;
+    if(!InFinalStack(sx,sy) && !InQueue(sx,sy)){
+      queue.push_back(temp);
     }
     
   }
   //for east
-  if(IsValidPath(val.x+1,val.y)){
+  int ex =x+1;
+  int ey = y;
+  if(IsValidPath(ex,ey)){
     Pos temp;
-    temp.x = val.x+1;
-    temp.y = val.y;
-    temp.heuristic = abs(gx-temp.x)+abs(gy-temp.y);
+    temp.x = ex;
+    temp.y = ey;
+    int heu = abs(gx-ex)+abs(gy-ey);
+    int cost = 1+ heu;
+    temp.heuristic = heu;
     temp.pathcost = 1;
-    temp.cost = temp.heuristic+temp.pathcost;
-    queue.push_back(temp);
-    //sort queue acc to cost
-    if(queue.size()>2){
-      //PrintQueue();
-      SortQueue();
-     
+    temp.cost = cost;
+    if(!InFinalStack(ex,ey) && !InQueue(ex,ey)){
+      queue.push_back(temp);
     }
   }
   //for west
-  if(IsValidPath(val.x-1,val.y)){
+  int wx =x-1;
+  int wy = y;
+  if(IsValidPath(wx,wy)){
     Pos temp;
-    temp.x = val.x-1;
-    temp.y = val.y;
-    temp.heuristic = abs(gx-temp.x)+abs(gy-temp.y);
+    temp.x = wx;
+    temp.y = wy;
+    int heu = abs(gx-wx)+abs(gy-wy);
+    int cost = 1+ heu;
+    temp.heuristic = heu;
     temp.pathcost = 1;
-    temp.cost = temp.heuristic+temp.pathcost;
-    queue.push_back(temp);
-    //sort queue acc to cost
-   if(queue.size()>2){
-     //PrintQueue();
-     SortQueue();
-    
-   }
+    temp.cost = cost;
+    if(!InFinalStack(wx,wy) && !InQueue(wx,wy)){
+      queue.push_back(temp);
+    }
+      
+  }
+  //sort
+  if(queue.size()>1){
+    SortQueue();
   }
 }
+
+//check if the diff between the new pos and old pos in finalstack is one
+bool Game::IsOneDiff(int x,int y){
+  int size = finalStack.size()-1;
+  int fx = finalStack[size].x;
+  int fy = finalStack[size].y;
+  if(x-fx == 1 && fy-y ==0 ||//east
+     x-fx == -1 && fy-y == 0||//west
+     x-fx == 0 && fy-y == -1||//north
+     x-fx == 0 && fy-y == 1//south
+     ){
+    return true;
+  }
+  return false;
+}
 //for path finding
-void Game::FindPath(int x, int y,int gx,int gy){ 
-  if(abs(gx-x)+abs(gy-y) == 0){
-    printf("FIND PATH COMPLETE !!!\n");
+void Game::FindPath(int x, int y,int gx,int gy){
+  //printf("Find path start!\n");
+  if(finalStack.size() == pacDist){
+    pathFound = true;
     return;
   }
   //first push the pacman pos
   Pos val;
   val.x =x;
   val.y = y;
-  val.heuristic = abs(gx-x)+abs(gy-y);
+  int heu = abs(gx-x)+abs(gy-y);
+  int cost = 1+ heu;
+  val.heuristic = heu;
   val.pathcost = 1;
-  val.cost = val.heuristic + val.pathcost;
-  finalStack.push_back(val);
+  val.cost = cost;
+  if(finalStack.empty()){
+    finalStack.push_back(val);
+  }
+  if(!finalStack.empty()){
+    PrintFinal();
+    //PrintQueue();
+    if(IsOneDiff(val.x,val.y)){
+      printf("One diff exist push!\n");
+      finalStack.push_back(val);
+    }
+  }
+  //printf("Into queue\n");
   //check NSEW and push into queue
-  CheckPaths(val,gx,gy);
+  CheckPaths(x,y,gx,gy);
+  
   //check for new top of queue
   if(!queue.empty()){
     Pos topQueue = queue[0];
@@ -309,15 +334,12 @@ bool Game::NoBounceback(int val){
   if(ghost.GetDir()==0 && val==1){
     return false;
   }
-  //south
   if(ghost.GetDir()==1 && val==0){
     return false;
   }
-  //east
   if(ghost.GetDir()==2 && val == 3){
     return false;
   }
-  //west
   if(ghost.GetDir()==3 && val==2){
     return false;
   }
@@ -328,7 +350,7 @@ int Game::GetNum(){
   int num;
   num = GetRandomNum();
   if(NoBounceback(num)){
-    printf("No bounce back\n");
+    //printf("No bounce back\n");
     //check if valid path
     if(IsNextDirValid(num)){
       return num;
@@ -343,33 +365,31 @@ bool Game::GhostHitWall(){
   case 0:
     {//north
       if(!IsValidPath(ghost.GetX(),ghost.GetY()-1)){
-	printf("Hits north wall\n");
+	//printf("Hits north wall\n");
 	return true;
       }
     }break;
   case 1:
     {//south
       if(!IsValidPath(ghost.GetX(),ghost.GetY()+1)){
-	printf("Hits south wall\n");
+	//printf("Hits south wall\n");
 	return true;
       }
     }break;
   case 2:
     {//east
       if(!IsValidPath(ghost.GetX()+1,ghost.GetY())){
-	printf("Hits east wall\n");
+	//printf("Hits east wall\n");
 	return true;
       }
     }break;
   case 3:
     {//west
       if(!IsValidPath(ghost.GetX()-1,ghost.GetY())){
-	printf("Hits west wall\n");
+	//printf("Hits west wall\n");
 	return true;
       }
     }break;
-  default:
-    return false;
   }
 
   return false;
@@ -379,47 +399,171 @@ bool Game::GhostHitWall(){
 void Game::RoamGhost(){
   int num = GetNum();
 
-  printf("Num generated: %d\n",num);
-  printf("Ghost current dir: %d\n",ghost.GetDir());
+  //printf("Num generated: %d\n",num);
+  //printf("Ghost current dir: %d\n",ghost.GetDir());
   ghost.Move(num);
 }
 //ghost scatter mode
 void Game::GhostScatter(){
-  if(GhostHitWall() || EventTriggered(2)){
-    printf("\nGhost hit wall\n");
+  if(GhostHitWall()){
+    //printf("\nGhost hit wall\n");
     RoamGhost();
   }
   ghost.MoveToDir();
   
+}
+//is pacmna near boundry
+bool Game::IsPacNear(){
+  int diffX = abs(pac.GetX() - ghost.GetX());
+  int diffY = abs(pac.GetY() - ghost.GetY());
+  if(diffX<=15 && diffY<=15){
+    return true;
+  }
+  return false;
+}
+//move to eat
+void Game::MoveToEat(){
+  /*
+  int size = finalStack.size()-1;
+  int x = finalStack[size].x - ghost.GetX();
+  int y = finalStack[size].y - ghost.GetY();
+
+  if(x==0 && y<1){//north
+    ghost.Move(0);
+    return;
+  }
+  if(x==0 && y>1){//south
+    ghost.Move(1);
+    return;
+  }
+  if(x>1 && y==0){//east
+    ghost.Move(2);
+    return;
+  }
+  if(x<1 && y==0){//west
+    ghost.Move(3);
+    return;
+  }
+  */
+  int size = finalStack.size()-1;
+  int x = finalStack[size].x;
+  int y = finalStack[size].y;
+  if(IsValidPath(x,y)){
+    ghost.SetX(x);
+    ghost.SetY(y);
+    //printf("Moved ghost to eat posx: %d  posy:%d \n",x,y);
+    finalStack.pop_back();
+  }
+}
+//hunt pacman
+void Game::HuntPacman(){
+  FindPath(pac.GetX(),pac.GetY(),ghost.GetX(),ghost.GetY());
+}
+
+//check last Mode change
+bool Game::ModeTriggered(double time){
+  double currentTime = GetTime();
+  if(currentTime-ghostModeChange >= time){
+    ghostModeChange = currentTime;
+    return true;
+  }
+  return false;
 }
 void Game::Update(){
   
   //pacmove
   pac.MoveToDir();
 
+  //check end condition
+  if(ghost.GetX()==pac.GetX()&&ghost.GetY()==pac.GetY()){
+    //printf("EASTEN EATEN!\n");
+  }
+  
+  //change mode to scatter :0 for scatter , 1 for hunt
+  if(ModeTriggered(5.0)){
+    //change to scatter
+    if(ghostMode == 1){
+      //nsew
+      int num = GetRandomNum();
+      switch(num){
+      case 0:{
+	if(IsValidPath(ghost.GetX(),ghost.GetY()-1)){
+	  ghost.Move(0);
+	}
+      }break;
+      case 1:{
+	if(IsValidPath(ghost.GetX(),ghost.GetY()+1)){
+	  ghost.Move(1);
+	}
+      }break;
+      case 2:{
+	if(IsValidPath(ghost.GetX()+1,ghost.GetY())){
+	  ghost.Move(2);
+	}
+      }break;
+      case 3:{
+	if(IsValidPath(ghost.GetX()-1,ghost.GetY())){
+	  ghost.Move(3);
+	}
+      }break;
+      default:
+	break;
+      }
+      printf("Scatter mode\n");
+      ghostMode =0;
+      
+    }else if(IsPacNear() && ghostMode == 0){//hunt mode
+      printf("Hunt Mode\n");
+      pathFound = false;
+      ghostMode = 1;
+    }
+  }
+  //modes
   if(ghostMode == 0){
     GhostScatter();
+  }
+  if(ghostMode == 1){
+    if( !pathFound){
+      //printf("Pacman in within 20x20 boundry\n");
+     
+      pacDist = abs(pac.GetX()-ghost.GetX())+abs(pac.GetY()-ghost.GetY());
+      
+      if(!queue.empty()){
+	queue.clear();
+      }
+      if(!finalStack.empty()){
+	finalStack.clear();
+      }
+      if(finalStack.empty()){
+	printf("Final stackempty before calling find path\n");
+      }
+      printf("PacDst : %d\n",pacDist);
+      int x = ghost.GetX();
+      int y = ghost.GetY();
+      printf("Pos of ghost before find path,posx: %d posy: %d\n",x,y);
+      FindPath(pac.GetX(),pac.GetY(),x,y);
+      printf("Find path complete!\n");
+      PrintFinal();
+      printf("\n");
+      PrintQueue();
+      printf("Pacman posx: %d posy: %d \n",pac.GetX(),pac.GetY());
+      //printf("ghost pos\n posX : %d posy: %d \n",ghost.GetX(),ghost.GetY());
+      //move ghost
+    }
+    if(!finalStack.empty()){
+      if(EventTriggered(0.1)){
+	MoveToEat();
+      }
+    }
+    
+    if(finalStack.empty()){
+      lastUpdatedTime = 0.0f;
+      pathFound = false;
+    }
   }
   
   CheckCollision();
   EatCoin();
-  
-  /*
-  if(!finalStack.empty()){
-  ghost.MoveToDir();
-  }
-  //print path
-  if(count<1){
-    PrintQueue();
-    PrintFinal();
-    count++;
-  }
-
-  if(pathFound){
-    //ghost movement
-    MoveToEat();
-  }
-  */
   
 }
 void Game::HandleInputs(){
