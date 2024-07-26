@@ -459,7 +459,7 @@ void Maze::Draw(){
     }
   }
   //print grid
-  //PrintLine();
+  PrintLine();
   
   
 }

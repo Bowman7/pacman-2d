@@ -11,6 +11,7 @@
 #include"pac.hpp"
 #include"ghost.hpp"
 
+
 struct Coin{
   int x;
   int y;
@@ -25,6 +26,22 @@ struct Pos{
   int pathcost;
   int cost;
   int dir;
+};
+
+//for A*
+struct Node{
+  int x;
+  int y;
+  float localVal = 1024.0f;
+  float globalVal = 1024.0f;
+  int dir;//n:0,s:1,e:2,w:3
+  bool visited;
+};
+struct pathTile{
+  int x;
+  int y;
+  int dir;
+  bool visited;
 };
 
 class Game{
@@ -62,7 +79,15 @@ public:
   bool InFinalStack(int,int);
   bool IsOneDiff(int,int);
   bool InQueue(int,int);
+  void SolveAStar();
+  void InitPathTile();
+  void sortList();
+  void printList();
 private:
+  //for A*
+  int tcount =0;
+  std::vector<Node> list;
+  pathTile tile[40][40];
   //ghost mode 0:scatter 1:atk
   //bool ghostDestReached = false;
   int pacDist;

@@ -51,8 +51,8 @@ void Ghost::MoveToDir(){
 }
 //init pacman
 void Ghost::InitGhost(){
-  x =20;
-  y =20;
+  x =38;
+  y =2;
 }
 
 //draw pacman

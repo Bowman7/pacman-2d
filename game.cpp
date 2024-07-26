@@ -2,6 +2,7 @@
 
 Game::Game(){
   InitCoin();
+ 
   
 }
 
@@ -168,8 +169,8 @@ bool Game::IsOneDiff(int x,int y){
   int fy = finalStack[size].y;
   if(x-fx == 1 && fy-y ==0 ||//east
      x-fx == -1 && fy-y == 0||//west
-     x-fx == 0 && fy-y == -1||//north
-     x-fx == 0 && fy-y == 1//south
+     x-fx == 0 && y-fy == -1||//north
+     x-fx == 0 && y-fy == 1//south
      ){
     return true;
   }
@@ -177,8 +178,9 @@ bool Game::IsOneDiff(int x,int y){
 }
 //for path finding
 void Game::FindPath(int x, int y,int gx,int gy){
-  //printf("Find path start!\n");
+  printf("PacDist : %d\n",pacDist);
   if(finalStack.size() == pacDist){
+    printf("Path found \n");
     pathFound = true;
     return;
   }
@@ -195,12 +197,16 @@ void Game::FindPath(int x, int y,int gx,int gy){
     finalStack.push_back(val);
   }
   if(!finalStack.empty()){
+    printf("Pos of ghost posx: %d posy: %d\n",gx,gy);
+    printf("\nFinal stack before push\n");
     PrintFinal();
     //PrintQueue();
     if(IsOneDiff(val.x,val.y)){
       printf("One diff exist push!\n");
       finalStack.push_back(val);
     }
+    printf("Final stack after push\n");
+    PrintFinal();
   }
   //printf("Into queue\n");
   //check NSEW and push into queue
@@ -469,15 +475,187 @@ bool Game::ModeTriggered(double time){
   }
   return false;
 }
+//sort list
+void Game::sortList(){
+  int size = list.size();
+  for(int i=0;i<size;i++){
+    for(int j=0;j<size-i-1;j++){
+      if(list[j].globalVal > list[j+1].globalVal){
+	Node temp;
+	temp = list[j];
+	list[j] = list[j+1];
+	list[j+1] = temp;
+      }
+    }
+  }
+}
+//init path tile
+void Game::InitPathTile(){
+  //init path tile
+  for(int i=0;i<39;i++){
+    for(int j=0;j<39;j++){
+      tile[i][j].x =i;
+      tile[i][j].y = j;
+      tile[i][j].dir = 0;//north by def
+      tile[i][j].visited = false;
+    }
+  }
+}
+//heuristic
+float heuristic(int x,int y,int gx,int gy){
+  int val = abs(x-gx)+abs(y-gy);
+  return val;
+}
+//print list
+void Game::printList(){
+  int size = list.size();
+  for(int i=0;i<size;i++){
+    printf(" x: %d y: %d local: %f global: %f dir:%d visited : %d\n",
+	   list[i].x,list[i].y,list[i].localVal,list[i].globalVal,
+	   list[i].dir,list[i].visited);
+  }
+}
+//solve a*
+void Game::SolveAStar(){
+  //init list
+  if(!list.empty()){
+    InitPathTile();
+    list.clear();
+  }
+  
+  Node currentNode;
+  currentNode.x = pac.GetX();
+  currentNode.y = pac.GetY();
+  currentNode.localVal = 0.0f;
+  currentNode.globalVal = heuristic(pac.GetX(),pac.GetY(),
+				 ghost.GetX(),ghost.GetY())+currentNode.localVal;
+
+  
+  list.push_back(currentNode);
+  
+  while(!list.empty()){
+    //sort
+    if(list.size()>1){
+      
+      sortList();
+    }
+    //pop front
+    while(!list.empty() && list[0].visited == true){
+      list.erase(list.begin());
+    }
+    //if empty break
+    if(list.empty()){
+      break;
+    }
+
+    //printf("List is aas \n");
+    //printList();
+    currentNode = list[0];
+    //printf("current nOde \n");
+    //printf("x: %d y: %d local: %f global: %f dir: %d visited: %d\n",
+    //	   currentNode.x,currentNode.y,currentNode.localVal,currentNode.globalVal,
+    //	   currentNode.dir,currentNode.visited
+    //	   );
+    list[0].visited = true;
+  
+    //check for neighbours NSEW
+    Node neighbour;
+    //east
+    int ex = currentNode.x+1;
+    int ey = currentNode.y;
+    if(IsValidPath(ex,ey)){
+      //printf("East has valid path\n");
+      //printf("print tile east visited val: %d\n",tile[currentNode.x+1][currentNode.y].visited);
+      
+      if(tile[ex+1][ey].visited == true){
+	printf("east side neighbour visited\n");
+	for(int i=0;i<list.size();i++){
+	  if(list[i].x == ex+1 && list[i].y == ey){
+	    neighbour = list[i];
+	  }
+	}
+      }else{
+	neighbour.x = ex+1;
+	neighbour.y =  ey;
+	if(tcount<1){
+	  printf("first neighbour\n");
+	  printf("x: %d y: %d local: %f global: %f dir: %d visited: %d\n",
+		 neighbour.x,neighbour.y,neighbour.localVal,neighbour.globalVal,
+		 neighbour.dir,neighbour.visited
+		 );
+	  tcount++;
+	}
+      }
+      if(currentNode.localVal+1 < neighbour.localVal){
+	neighbour.localVal = currentNode.localVal+1;
+	neighbour.globalVal = heuristic(neighbour.x,neighbour.y,
+					ghost.GetX(),ghost.GetY())+neighbour.localVal;
+	neighbour.dir = 3;//west
+	tile[neighbour.x][neighbour.y].dir = 3;
+	if(tcount<2){
+	  printf("new neighbour val after it meets pac\n");
+	  printf("x: %d y: %d local: %f global: %f dir: %d visited: %d\n",
+		 neighbour.x,neighbour.y,neighbour.localVal,neighbour.globalVal,
+		 neighbour.dir,neighbour.visited
+		 );
+	  printf("tile val[%d][%d] dir: %d\n",neighbour.x,neighbour.y,
+		 tile[neighbour.x][neighbour.y].dir
+		 );
+	  tcount++;
+	}
+      }
+      list.push_back(neighbour);
+      if(tcount<3){
+	printf("list after first push\n");
+	printList();
+	tcount++;
+      }
+    }
+
+    if(tcount<4){
+      printf("curre val before west check\n");
+      printf("x: %d y: %d\n",currentNode.x,currentNode.y);
+      tcount++;
+    }
+    //west
+    int wx =currentNode.x-1;
+    int wy =currentNode.y;
+    if(tcount<5){
+	printf("west side befoer valid\n");
+	printf("wx: %d wy: %d\n",wx,wy);
+	tcount++;
+      }
+    if(IsValidPath(wx,wy)){
+      
+      //printf("west side tile empty\n");
+      if(tile[currentNode.x-1][currentNode.y].visited == true){
+	//printf("west side neighbour visited\n");
+	for(int i=0;i<list.size();i++){
+	  if(list[i].x == currentNode.x-1 && list[i].y == currentNode.y){
+	    neighbour = list[i];
+	  }
+	}
+      }else{
+	neighbour.x = currentNode.x-1;
+	neighbour.y = currentNode.y;
+      }
+      if(currentNode.localVal+1 < neighbour.localVal){
+	
+	neighbour.localVal = currentNode.localVal+1;
+	neighbour.globalVal = heuristic(neighbour.x,neighbour.y,
+					ghost.GetX(),ghost.GetY())+neighbour.localVal;
+	neighbour.dir = 2;//east
+	tile[neighbour.x][neighbour.y].dir = 2;
+      }
+      list.push_back(neighbour);
+    } 
+  }
+  
+}
 void Game::Update(){
   
   //pacmove
   pac.MoveToDir();
-
-  //check end condition
-  if(ghost.GetX()==pac.GetX()&&ghost.GetY()==pac.GetY()){
-    //printf("EASTEN EATEN!\n");
-  }
   
   //change mode to scatter :0 for scatter , 1 for hunt
   if(ModeTriggered(5.0)){
@@ -512,9 +690,8 @@ void Game::Update(){
       printf("Scatter mode\n");
       ghostMode =0;
       
-    }else if(IsPacNear() && ghostMode == 0){//hunt mode
+    }else if(ghostMode == 0){//hunt mode
       printf("Hunt Mode\n");
-      pathFound = false;
       ghostMode = 1;
     }
   }
@@ -523,43 +700,27 @@ void Game::Update(){
     GhostScatter();
   }
   if(ghostMode == 1){
-    if( !pathFound){
-      //printf("Pacman in within 20x20 boundry\n");
-     
-      pacDist = abs(pac.GetX()-ghost.GetX())+abs(pac.GetY()-ghost.GetY());
-      
-      if(!queue.empty()){
-	queue.clear();
-      }
-      if(!finalStack.empty()){
-	finalStack.clear();
-      }
-      if(finalStack.empty()){
-	printf("Final stackempty before calling find path\n");
-      }
-      printf("PacDst : %d\n",pacDist);
-      int x = ghost.GetX();
-      int y = ghost.GetY();
-      printf("Pos of ghost before find path,posx: %d posy: %d\n",x,y);
-      FindPath(pac.GetX(),pac.GetY(),x,y);
-      printf("Find path complete!\n");
-      PrintFinal();
-      printf("\n");
-      PrintQueue();
-      printf("Pacman posx: %d posy: %d \n",pac.GetX(),pac.GetY());
-      //printf("ghost pos\n posX : %d posy: %d \n",ghost.GetX(),ghost.GetY());
-      //move ghost
+    if(IsValidPath(1,2)){
+      printf("valid\n");
     }
-    if(!finalStack.empty()){
-      if(EventTriggered(0.1)){
-	MoveToEat();
-      }
+    SolveAStar();
+    /*
+    //move to dir ghost
+    if(tile[ghost.GetX()][ghost.GetY()].dir == 0){
+      ghost.Move(0);
     }
-    
-    if(finalStack.empty()){
-      lastUpdatedTime = 0.0f;
-      pathFound = false;
+    if(tile[ghost.GetX()][ghost.GetY()].dir == 1){
+      ghost.Move(1);
     }
+    if(tile[ghost.GetX()][ghost.GetY()].dir == 2){
+      ghost.Move(2);
+    }
+    if(tile[ghost.GetX()][ghost.GetY()].dir == 3){
+      ghost.Move(3);
+    }
+
+    ghost.MoveToDir();
+    */
   }
   
   CheckCollision();
