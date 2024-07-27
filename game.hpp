@@ -36,6 +36,7 @@ struct Node{
   float globalVal = 1024.0f;
   int dir;//n:0,s:1,e:2,w:3
   bool visited;
+  std::vector<Node*> vecNeighbours; 
 };
 struct pathTile{
   int x;
@@ -83,16 +84,26 @@ public:
   void InitPathTile();
   void sortList();
   void printList();
+  void printTile();
+  void listSwap(Node &,Node &);
 private:
   //for A*
+  int starX,starY;
+  int targetX,targetY;
+  int dist;
   int tcount =0;
-  std::vector<Node> list;
+  int wcount = 0;
+  std::vector<Node*> list;
   pathTile tile[40][40];
+  bool pathFound = false;
+  bool reachTileEnd = false;
+
+  
   //ghost mode 0:scatter 1:atk
   //bool ghostDestReached = false;
   int pacDist;
   int ghostMode = 1;
-  bool pathFound = false;
+  //bool pathFound = false;
   //time keep
   double lastUpdatedTime = 0.0f;
   double ghostModeChange  =0.0f;
