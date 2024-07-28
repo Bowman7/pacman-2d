@@ -15,7 +15,7 @@ std::vector<Node*> list;
 void printList(){
   printf("\n List\n");
   int size = list.size();
-  for(int i=0;i<10;i++){
+  for(int i=0;i<size;i++){
     printf(" x: %d y: %d global: %d \n",list[i]->x,list[i]->y,list[i]->global);
   }
 }
@@ -48,6 +48,13 @@ int main(){
   two->y =0;
   two->global = 20;
   list.push_back(two);
+
+  Node * three = new Node;
+  three->x = 2;
+  three->y =0;
+  three->global = 30;
+  list.push_back(three);
+  
   printf("before sort\n");
   printList();
   printf("sort\n");

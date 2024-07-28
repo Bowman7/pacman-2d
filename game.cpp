@@ -4,7 +4,7 @@ Game::Game(){
   InitCoin();
   
   ghost.SetX(38);
-  ghost.SetY(2);
+  ghost.SetY(38);
   
   pac.SetX(2);
   pac.SetY(2);
@@ -48,8 +48,8 @@ void Game::SortQueue(){
   printf("Queue before sort\n");
   PrintQueue();
   int size = queue.size();
-  for(int i=0;i<size;i++){
-    for(int j=0;j<size-i-1;j++){
+  for(int i=0;i<size;++i){
+    for(int j=0;j<size-i-1;++j){
       if(queue[j].cost > queue[j+1].cost){
 	Pos temp;
 	temp = queue[j];
@@ -185,7 +185,7 @@ void Game::FindPath(int x, int y,int gx,int gy){
   printf("PacDist : %d\n",pacDist);
   if(finalStack.size() == pacDist){
     printf("Path found \n");
-    pathFound = true;
+    
     return;
   }
   //first push the pacman pos
@@ -489,8 +489,8 @@ void Game::listSwap(Node &n1,Node &n2){
 //sort list
 void Game::sortList(){
   int size = list.size();
-  for(int i=0;i<size;i++){
-    for(int j=0;j<size-i-1;j++){
+  for(int i=0;i<size;++i){
+    for(int j=0;j<size-i-1;++j){
       Node *n1 = list[j];
       Node *n2 = list[j+1];
       if(n1->globalVal > n2->globalVal){
@@ -510,30 +510,25 @@ void Game::InitPathTile(){
     for(int j=0;j<40;j++){
       tile[i][j].x =i;
       tile[i][j].y = j;
-      tile[i][j].dir = 5;//5 by def
-      tile[i][j].visited = false;
+      tile[i][j].dir = 9;//5 by def
+      tile[i][j].visited = 0;
     }
   }
 }
-//heuristic
-float heuristic(int x,int y,int gx,int gy){
-  float val = sqrt((x-gx)*(x-gx)+(y-gy)*(y-gy));
-  return val;
-}
-/*
+
 //print list
 void Game::printList(){
   int size = list.size();
   for(int i=0;i<size;i++){
     printf(" x: %d y: %d local: %f global: %f dir:%d visited : %d\n",
-	   list[i].x,list[i].y,list[i].localVal,list[i].globalVal,
-	   list[i].dir,list[i].visited);
+	   list[i]->x,list[i]->y,list[i]->localVal,list[i]->globalVal,
+	   list[i]->dir,list[i]->visited);
   }
 }
-*/
 
-float heuristic(Node *a,Node *b){
-  float val = sqrt((a->x - b->x)*(a->x - b->y) + (a->y - b->y)*(a->y - b->y));
+
+float heuristic(int ax,int ay , int bx,int by){
+  float val = (bx-ax)*(bx-ax)+(by-ay)*(by-ay);
   return val;
 }
 //solve a*
@@ -560,14 +555,33 @@ void Game::SolveAStar(){
   
   list.push_back(nodeStart);
   
-  while(!list.empty()){
+  int  totalIter = abs(ghost.GetX()-pac.GetX())+abs(ghost.GetY()-pac.GetY());
+  //main while loop
+  while(!list.empty() && !starReached){
+    if(list[0]->x==nodeEnd->x && list[0]->y==nodeEnd->y ){
+      starReached = true;
+    }
+    if(iter<totalIter){
+      printf("\n\nIteration : %d\n\n",iter);
+    }
     //sort
-    if(list.size()>2){
+    if(list.size()>1){
       sortList();
     }
+    if(iter<totalIter){
+      printf("list before sort:\n");
+      printList();
+      printf("list after sort\n");
+      printList();
+    }
+    
     //pop front
     while(!list.empty() && list[0]->visited == true){
       list.erase(list.begin());
+      if(iter<totalIter){
+	printf("list after erase:\n");
+	printList();
+      }
     }
     //if empty break
     if(list.empty()){
@@ -576,63 +590,182 @@ void Game::SolveAStar(){
 
     nodeCurrent = list[0];
     nodeCurrent->visited = true;
+    int x = list[0]->x;
+    int y = list[0]->y;
+    tile[x][y].visited = true;
+    if(iter<totalIter){
+      printf("After setting first list ele visited:\n");
+      printList();
+      printf("tile[%d][%d] visited = %d\n",x,y,tile[x][y].visited);
+    }
 
     //check for neighbours and point the currentNode to it
+    
+    //north neighbour
+    Node *nNeighbour =  new Node;
+    int nx = nodeCurrent->x;
+    int ny = nodeCurrent->y-1;
+    if(IsValidPath(nx,ny) && !tile[nx][ny].visited){
+      
+      nNeighbour->x= nx;
+      nNeighbour->y = ny;
+      nNeighbour->dir = 0;//north
+      
+      nodeCurrent->vecNeighbours.push_back(nNeighbour);
+    }
+
+    //south Neighbour
+    Node *sNeighbour =  new Node;
+    int sx = nodeCurrent->x;
+    int sy = nodeCurrent->y+1;
+    if(IsValidPath(sx,sy) && !tile[sx][sy].visited){
+      
+      sNeighbour->x= sx;
+      sNeighbour->y = sy;
+      sNeighbour->dir = 1;//south
+      
+      nodeCurrent->vecNeighbours.push_back(sNeighbour);
+    }
+   
     //east neighbour
     Node *eNeighbour =  new Node;
     int ex = nodeCurrent->x+1;
     int ey = nodeCurrent->y;
-    if(IsValidPath(ex,ey)){
+    if(IsValidPath(ex,ey) && !tile[ex][ey].visited){
+      
       eNeighbour->x= ex;
       eNeighbour->y = ey;
       eNeighbour->dir = 2;//east
-      //std::vector<Node*> temp = nodeCurrent->vecNeighbours;
+      eNeighbour->visited = false;
+      
       nodeCurrent->vecNeighbours.push_back(eNeighbour);
-      //eNeighbour->vecNeighbours = temp;
+
+      if(iter<totalIter){
+	printf("East side neighbour present!: \n");
+	printList();
+
+      }
     }
+    
     //west neighbour
     Node *wNeighbour = new Node;
     int wx = nodeCurrent->x-1;
     int wy = nodeCurrent->y;
-    if(IsValidPath(wx,wy)){
+    if(IsValidPath(wx,wy) && !tile[wx][wy].visited){
+      
       wNeighbour->x = wx;
       wNeighbour->y = wy;
       wNeighbour->dir = 3;//west
-      //Node *temp = nodeCurrent->vecNeighbours;
+      wNeighbour->visited = false;
+      
       nodeCurrent->vecNeighbours.push_back(wNeighbour);
-      //wNeighbour->vecNeighbours = temp;
+      
+      if(iter<totalIter){
+	printf("West  side neighbour present!: \n");
+	printList();	
+      }
     }
     
+    
     //iterate through the neighbours
-    for(Node *nodeNeighbour : nodeCurrent->vecNeighbours){
-      if(!nodeNeighbour->visited){
-	list.push_back(nodeNeighbour);
+    int size = nodeCurrent->vecNeighbours.size();
+    std::vector<Node*> nodeNeighbour;
+    //push all current neighbours into new nodeNeighbour
+    for(int i=0;i<size;i++){
+      nodeNeighbour.push_back(nodeCurrent->vecNeighbours[i]);
+    }
+    if(iter<totalIter){
+      printf("print neihgbours before checking and pushing:\n");
+      int s = nodeNeighbour.size();
+      for(int i=0;i<s;i++){
+	printf(" x: %d y: %d local: %f global: %f dir:%d visited: %d tile[%d][%d]visit: %d\n",
+	       nodeNeighbour[i]->x,nodeNeighbour[i]->y,nodeNeighbour[i]->localVal,
+	       nodeNeighbour[i]->globalVal,nodeNeighbour[i]->dir,nodeNeighbour[i]->visited,
+	       x,y,tile[x][y].visited);
       }
+    }
+    //check all neighbours
+    for(int i=0;i<size;i++){
+      if(!nodeNeighbour[i]->visited){
+	list.push_back(nodeNeighbour[i]);
+	if(iter<totalIter){
+	  printf("list after pusing neighbour\n");
+	  printList();
+	}
+      }
+      
       //check cur local with neighbour to change neighbours local
-      float possiblyLowerLocal = nodeCurrent->localVal + heuristic(nodeCurrent,nodeNeighbour) ;
-
-      if(possiblyLowerLocal < nodeNeighbour->localVal){
+      float possiblyLowerLocal = nodeCurrent->localVal + 1;
+      if(iter<totalIter){
+	printf("possible lower local value to check: %f\n",possiblyLowerLocal);
+      }
+      
+      if(possiblyLowerLocal < nodeNeighbour[i]->localVal){
+	
+	
 	//check dir and set acc
-	//if east we dir to west
-	if(nodeNeighbour->dir ==2){
-	  nodeNeighbour->dir = 3;
-	  int x = nodeNeighbour->x;
-	  int y = nodeNeighbour->y;
-	  int dir = nodeNeighbour->dir;
+	if(nodeNeighbour[i]->dir == 0){//if north parent is south
+	  
+	  nodeNeighbour[i]->dir = 1;
+	  nodeNeighbour[i]->visited = false;
+	  int x = nodeNeighbour[i]->x;
+	  int y = nodeNeighbour[i]->y;
+	  int dir = nodeNeighbour[i]->dir;
 	  tile[x][y].dir = dir;
-	}else if(nodeNeighbour->dir == 3){//if west set to east
-	  nodeNeighbour->dir = 2;
-	  int x = nodeNeighbour->x;
-	  int y = nodeNeighbour->y;
-	  int dir =  nodeNeighbour->dir;
+	  
+	}else if(nodeNeighbour[i]->dir==1){//if south parent is north
+	  
+	  nodeNeighbour[i]->dir = 0;
+	  nodeNeighbour[i]->visited = false;
+	  int x = nodeNeighbour[i]->x;
+	  int y = nodeNeighbour[i]->y;
+	  int dir = nodeNeighbour[i]->dir;
+	  tile[x][y].dir = dir;
+	  
+	}else if(nodeNeighbour[i]->dir ==2){//if east parent is west
+	  
+	  nodeNeighbour[i]->dir = 3;
+	  nodeNeighbour[i]->visited = false;
+	  int x = nodeNeighbour[i]->x;
+	  int y = nodeNeighbour[i]->y;
+	  int dir = nodeNeighbour[i]->dir;
+	  tile[x][y].dir = dir;
+	 
+	}else if(nodeNeighbour[i]->dir == 3){//if west parent is east
+	  
+	  nodeNeighbour[i]->dir = 2;
+	  nodeNeighbour[i]->visited = false;
+	  int x = nodeNeighbour[i]->x;
+	  int y = nodeNeighbour[i]->y;
+	  int dir =  nodeNeighbour[i]->dir;
 	  tile[x][y].dir = dir;
 	}
-
-	nodeNeighbour->localVal = possiblyLowerLocal;
-	nodeNeighbour->globalVal = nodeNeighbour->localVal + heuristic(nodeNeighbour,nodeEnd);
 	
-      }  
+
+	nodeNeighbour[i]->localVal = possiblyLowerLocal;
+	if(iter<totalIter){
+	  printf("neighbour local val:%f\n",nodeNeighbour[i]->localVal);
+	}
+	//setting the global val
+	float val = heuristic(nodeNeighbour[i]->x,nodeNeighbour[i]->y,nodeEnd->x,nodeEnd->y);
+	if(iter<totalIter){
+	  printf("new gobal val of neighbour: %f\n",val);
+	}
+	nodeNeighbour[i]->globalVal = nodeNeighbour[i]->localVal+val;
+	
+	if(iter<totalIter){
+	  printf("local val is lower than neighbour ,update neihghboru val\n");
+	  printf("neighbour after update\n");
+	  printf(" x: %d y: %d local: %f global: %f dir:%d visited : %d\n",
+		 nodeNeighbour[i]->x,nodeNeighbour[i]->y,nodeNeighbour[i]->localVal,
+		 nodeNeighbour[i]->globalVal,nodeNeighbour[i]->dir,nodeNeighbour[i]->visited);
+
+	  printf("list after updating neighbour\n");
+	  printList();
+	}
+      } 
     }
+    iter++;
   }
 }
 //print tile path
@@ -641,7 +774,7 @@ void Game::printTile(){
   //print tile
   for(int i=0;i<40;i++){
     for(int j=0;j<40;j++){
-      printf(" %d ",tile[i][j].dir);
+      printf(" %d ",tile[j][i].dir);
     }
     printf("\n");
   }
@@ -651,9 +784,9 @@ void Game::Update(){
   //pacmove
   pac.MoveToDir();
 
-  /*
+  
   //change mode to scatter :0 for scatter , 1 for hunt
-  if(ModeTriggered(3.0)){
+  if(ModeTriggered(5.0)){
     //change to scatter
     if(ghostMode == 1){
       //nsew
@@ -687,25 +820,48 @@ void Game::Update(){
       
     }else if(ghostMode == 0){//hunt mode
       printf("Hunt Mode\n");
-      pathFound = false;
-      if(IsPacNear()){
-	ghostMode = 1;
-      }
+      ghostMode = 1;
     }
   }
-  */
+
   //modes
   if(ghostMode == 0){
-    //GhostScatter();
+    GhostScatter();
   }
   if(ghostMode == 1){
-    
+
+    if(pcount<1){
+      finalTileX = pac.GetX();
+      finalTileY = pac.GetY();
+      pcount++;
+    }
+    //check if rached last tile
+    if(ghost.GetX()==finalTileX && ghost.GetY()==finalTileY){
+      reachedLastTile = true;
+      pcount--;
+    }
+    if(reachedLastTile){
+      pathFound = false;
+      starReached = false;
+    }
+    if(!pathFound){
       InitPathTile();
       printf("Tile before A star\n");
       printTile();
       SolveAStar();
       printf("Tile After A star\n");
       printTile();
+      pathFound = true;
+    }
+    
+    if(pathFound){  
+      int x  =ghost.GetX();
+      int y = ghost.GetY();
+      int dir = tile[x][y].dir;
+      ghost.Move(dir);
+      ghost.MoveToDir();
+    }
+    
   }
   
   CheckCollision();

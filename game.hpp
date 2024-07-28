@@ -6,6 +6,7 @@
 #include<cmath>
 #include<stdio.h>
 #include<random>
+#include<limits>
 
 #include"grid2.hpp"
 #include"pac.hpp"
@@ -32,8 +33,8 @@ struct Pos{
 struct Node{
   int x;
   int y;
-  float localVal = 1024.0f;
-  float globalVal = 1024.0f;
+  float localVal = std::numeric_limits<float>::infinity();
+  float globalVal =  std::numeric_limits<float>::infinity();
   int dir;//n:0,s:1,e:2,w:3
   bool visited;
   std::vector<Node*> vecNeighbours; 
@@ -87,16 +88,19 @@ public:
   void printTile();
   void listSwap(Node &,Node &);
 private:
+  //for a* mode switch
+  bool pathFound = false;
+  int finalTileX,finalTileY;
+  bool reachedLastTile = false;
   //for A*
-  int starX,starY;
-  int targetX,targetY;
+  bool starReached = false;
+  int iter = 0;
   int dist;
+  int pcount =0;
   int tcount =0;
   int wcount = 0;
   std::vector<Node*> list;
   pathTile tile[40][40];
-  bool pathFound = false;
-  bool reachTileEnd = false;
 
   
   //ghost mode 0:scatter 1:atk
