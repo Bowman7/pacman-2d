@@ -70,11 +70,11 @@ public:
   bool EventTriggered(double);
   void RoamGhost();
   int GetRandomNum();
-  int GetNum();
-  bool IsNextDirValid(int);
+  int GetNum(int);
+  bool IsNextDirValid(int,int);
   bool GhostHitWall();
   void GhostScatter();
-  bool NoBounceback(int);
+  bool NoBounceback(int,int);
   bool IsPacNear();
   void HuntPacman();
   bool ModeTriggered(double);
@@ -87,26 +87,49 @@ public:
   void printList();
   void printTile();
   void listSwap(Node &,Node &);
-private:
-  //for a* mode switch
-  bool pathFound = false;
-  int finalTileX,finalTileY;
-  bool reachedLastTile = false;
+  void modAStar(int);
+  void InitMoveDirBeforeScatter();
+  void RedMoveSeq();
+  bool pinkGhostHitWall();
+  void RoamPinkGhost();
+  void InitPinkMoveDir();
+  //for pink ghost
+  void PinkMoveSeq();
+  void PinkInitPathTile();
+  int PinkEastWest();
+  int PinkNorthSouth();
+private:  
   //for A*
-  bool starReached = false;
+  
   int iter = 0;
   int dist;
-  int pcount =0;
+  
   int tcount =0;
   int wcount = 0;
   std::vector<Node*> list;
-  pathTile tile[40][40];
+  
 
+  int ghostMode = 1;
+
+  Ghost ghost;//red ghost
+  pathTile tile[40][40];
+  int rcount = 0;
+  int rFinalTileX,rFinalTileY;
+  bool rReachedLastTile = false;
+  bool rPathFound = false;
+  bool starReached = false;
+  
+  //pink ghost
+  Ghost pinkGhost;
+  pathTile pinkTile[40][40];
+  int pcount =0;
+  int pFinalTileX,pFinalTileY;
+  bool pReachedLastTile = false;
+  bool pPathFound = false;
   
   //ghost mode 0:scatter 1:atk
-  //bool ghostDestReached = false;
   int pacDist;
-  int ghostMode = 1;
+  
   //bool pathFound = false;
   //time keep
   double lastUpdatedTime = 0.0f;
@@ -122,5 +145,5 @@ private:
   Maze maze;
   Coin coin[40][40];
   Pac pac;
-  Ghost ghost;
+  
 };

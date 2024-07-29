@@ -62,10 +62,18 @@ public:
   void RevertWest(){
     x+=1;
   }
-
+  void SetColor(int col){
+    //0: red 1: pink
+    if(col == 0){
+      color = RED;
+    }else if(col == 1){
+      color = PINK;
+    }
+  }
  
 private:
 
+  Color color;
   int x;
   int y;
   g_direction dir;

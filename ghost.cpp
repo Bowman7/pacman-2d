@@ -57,5 +57,5 @@ void Ghost::InitGhost(){
 
 //draw pacman
 void Ghost::Draw(){
-  DrawCircle(x*25,y*25,20,RED);
+  DrawCircle(x*25,y*25,20,color);
 }
