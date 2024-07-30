@@ -12,7 +12,11 @@ Game::Game(){
   pinkGhost.SetColor(1);
   pinkGhost.SetX(2);
   pinkGhost.SetY(38);
-  
+
+  //blue ghost init
+  blueGhost.SetColor(2);
+  blueGhost.SetX(38);
+  blueGhost.SetY(2);
   pac.SetX(2);
   pac.SetY(2);
 }
@@ -344,6 +348,9 @@ bool Game::IsNextDirValid(int val,int ghostType){
   }else if(ghostType == 1){//for pink ghost
     valX = pinkGhost.GetX();
     valY = pinkGhost.GetY();
+  }else if(ghostType == 2){//blue ghost
+    valX = blueGhost.GetX();
+    valY = blueGhost.GetY();
   }
   //north
   if(val == 0){
@@ -378,6 +385,8 @@ bool Game::NoBounceback(int val,int ghostType){
     dir = ghost.GetDir();
   }else if(ghostType == 1){//for pink ghost
     dir = pinkGhost.GetDir();
+  }else if(ghostType == 2){//for blue ghost
+    dir = blueGhost.GetDir();
   }
   //north
   if(dir==0 && val==1){
@@ -482,6 +491,43 @@ bool Game::pinkGhostHitWall(){
   }
   return false;
 }
+//chec for blue ghost hitting wall
+bool Game::blueGhostHitWall(){  
+  //for blue ghost
+  switch(blueGhost.GetDir()){
+  case 0:
+    {//north
+      if(!IsValidPath(blueGhost.GetX(),blueGhost.GetY()-1)){
+	//printf("Hits north wall\n");
+	return true;
+      }
+    }break;
+  case 1:
+    {//south
+      if(!IsValidPath(blueGhost.GetX(),blueGhost.GetY()+1)){
+	//printf("Hits south wall\n");
+	return true;
+      }
+    }break;
+  case 2:
+    {//east
+      if(!IsValidPath(blueGhost.GetX()+1,blueGhost.GetY())){
+	//printf("Hits east wall\n");
+	return true;
+      }
+    }break;
+  case 3:
+    {//west
+      if(!IsValidPath(blueGhost.GetX()-1,blueGhost.GetY())){
+	//printf("Hits west wall\n");
+	return true;
+      }
+    }break;
+  default:
+    return false;
+  }
+  return false;
+}
 //roam red ghost
 void Game::RoamGhost(){
   int num = GetNum(0);//0 for red ghost
@@ -492,6 +538,11 @@ void Game::RoamGhost(){
 void Game::RoamPinkGhost(){
   int pnum = GetNum(1);//1 for pink ghost
   pinkGhost.Move(pnum);
+}
+//roam blue ghost
+void Game::RoamBlueGhost(){
+  int bnum = GetNum(2);//for 2 for blue ghost
+  blueGhost.Move(bnum);
 }
 //ghost scatter mode
 void Game::GhostScatter(){
@@ -504,9 +555,14 @@ void Game::GhostScatter(){
   if(pinkGhostHitWall()){
     RoamPinkGhost();
   }
+  //for blue ghost
+  if(blueGhostHitWall()){
+    RoamBlueGhost();
+  }
   //move to pointed directions
   ghost.MoveToDir();
   pinkGhost.MoveToDir();
+  blueGhost.MoveToDir();
   
 }
 //is pacmna near boundry
@@ -615,6 +671,19 @@ void Game::PinkInitPathTile(){
     }
   }
 }
+//init path tile for blue ghost
+void Game::BlueInitPathTile(){
+  //init path tile
+  //printf("\nINIT PATH TILE \n");
+  for(int i=0;i<40;i++){
+    for(int j=0;j<40;j++){
+      blueTile[i][j].x =i;
+      blueTile[i][j].y = j;
+      blueTile[i][j].dir = 9;//5 by def
+      blueTile[i][j].visited = false;
+    }
+  }
+}
 //print list
 void Game::printList(){
   int size = list.size();
@@ -639,7 +708,32 @@ int Game::PinkEastWest(){
   if(dir == 2){//east
     if(IsValidPath(jX+2,jY)){
       if(IsValidPath(jX+4,jY)){
-	return jY+4;
+	return jX+4;
+      }
+      return jX+2;
+    }
+    return jX;
+  }else if(dir == 3){//west
+    if(IsValidPath(jX-2,jY)){
+      if(IsValidPath(jX-4,jY)){
+	return jX-4;
+      }
+      return jX-2;
+    }
+    return jX;
+  }
+
+  return jX;
+}
+//check four steps for east west for blue ghost
+int Game::BlueEastWest(){
+  int jX = pac.GetX();
+  int jY = pac.GetY();
+  int dir = pac.GetDir();
+  if(dir == 2){//east
+    if(IsValidPath(jX+2,jY)){
+      if(IsValidPath(jX+4,jY)){
+	return jX+4;
       }
       return jX+2;
     }
@@ -670,11 +764,36 @@ int Game::PinkNorthSouth(){
     }
     return jY;
   }else if(dir == 1){//south
+    if(IsValidPath(jX,jY+2)){
+      if(IsValidPath(jX,jY+4)){
+	return jY+4;
+      }
+      return jY+2;
+    }
+    return jY;
+  }
+
+  return jY;
+}
+//check  four step north south for blue ghost
+int Game::BlueNorthSouth(){
+  int jX = pac.GetX();
+  int jY = pac.GetY();
+  int dir = pac.GetDir();
+  if(dir == 0){//north
     if(IsValidPath(jX,jY-2)){
       if(IsValidPath(jX,jY-4)){
 	return jY-4;
       }
       return jY-2;
+    }
+    return jY;
+  }else if(dir == 1){//south
+    if(IsValidPath(jX,jY+2)){
+      if(IsValidPath(jX,jY+4)){
+	return jY+4;
+      }
+      return jY+2;
     }
     return jY;
   }
@@ -710,6 +829,14 @@ void Game::modAStar(int ghostType){
     ghostPosX  = pinkGhost.GetX();
     ghostPosY  = pinkGhost.GetY();
     
+  }else if(ghostType == 2){//for blue ghost
+    //check for four forward 
+    int posX = blueGhost.GetX();
+    int posY = blueGhost.GetY();
+    nodeEnd->x = posX;
+    nodeEnd->y = posY;
+    ghostPosX  = blueGhost.GetX();
+    ghostPosY  = blueGhost.GetY();
   }
   
   Node *nodeStart = new Node;
@@ -720,6 +847,7 @@ void Game::modAStar(int ghostType){
     nodeStart->y = pac.GetY();
     startPosX = pac.GetX();
     startPosY = pac.GetY();
+    
   }else if(ghostType == 1){//for pink ghost
     int jumpPosX = pac.GetX();
     int jumpPosY = pac.GetY();
@@ -730,7 +858,21 @@ void Game::modAStar(int ghostType){
       jumpPosY = PinkNorthSouth();
     }
     nodeStart->x = jumpPosX;
-    nodeStart->y = pac.GetY();
+    nodeStart->y = jumpPosY;
+    startPosX = pac.GetX();
+    startPosY = pac.GetY();
+    
+  }else if(ghostType == 2){//for blue
+    int jumpPosX = pac.GetX();
+    int jumpPosY = pac.GetY();
+    int dir = pac.GetDir();
+    if(dir == 2 || dir == 3){
+      jumpPosX = BlueEastWest();
+    }else if(dir == 0 || dir == 1){
+      jumpPosY = BlueNorthSouth();
+    }
+    nodeStart->x = jumpPosX;
+    nodeStart->y = jumpPosY;
     startPosX = pac.GetX();
     startPosY = pac.GetY();
   }
@@ -786,6 +928,8 @@ void Game::modAStar(int ghostType){
 	//printf("seg fault area: x:%d y:%d \n",x,y);
       }
       pinkTile[x][y].visited = true;
+    }else if(ghostType == 2){//blue ghost
+      blueTile[x][y].visited = true;
     }
     if(iter<totalIter){
       //printf("After setting first list ele visited:\n");
@@ -804,6 +948,8 @@ void Game::modAStar(int ghostType){
       ntileVisited = tile[nx][ny].visited; 
     }else if(ghostType == 1){
       ntileVisited = pinkTile[nx][ny].visited;
+    }else if(ghostType == 2){
+      ntileVisited = blueTile[nx][ny].visited;
     }
     if(IsValidPath(nx,ny) && !ntileVisited){
       
@@ -823,6 +969,8 @@ void Game::modAStar(int ghostType){
       stileVisited = tile[sx][sy].visited; 
     }else if(ghostType == 1){
       stileVisited = pinkTile[sx][sy].visited;
+    }else if(ghostType == 2){
+      stileVisited = blueTile[sx][sy].visited;
     }
     if(IsValidPath(sx,sy) && !stileVisited){
       
@@ -842,6 +990,8 @@ void Game::modAStar(int ghostType){
       etileVisited = tile[ex][ey].visited; 
     }else if(ghostType == 1){
       etileVisited = pinkTile[ex][ey].visited;
+    }else if(ghostType == 2){
+      etileVisited = blueTile[ex][ey].visited;
     }
     if(IsValidPath(ex,ey) && !etileVisited){
       
@@ -868,6 +1018,8 @@ void Game::modAStar(int ghostType){
       wtileVisited = tile[wx][wy].visited; 
     }else if(ghostType == 1){
       wtileVisited = pinkTile[wx][wy].visited;
+    }else if(ghostType == 2){
+      wtileVisited = blueTile[wx][wy].visited;
     }
     if(IsValidPath(wx,wy) && !wtileVisited){
       
@@ -934,6 +1086,8 @@ void Game::modAStar(int ghostType){
 	    tile[x][y].dir = dir;
 	  }else if(ghostType == 1){
 	    pinkTile[x][y].dir = dir;
+	  }else if(ghostType == 2){
+	    blueTile[x][y].dir = dir;
 	  }
 	  
 	}else if(nodeNeighbour[i]->dir==1){//if south parent is north
@@ -947,6 +1101,8 @@ void Game::modAStar(int ghostType){
 	    tile[x][y].dir = dir;
 	  }else if(ghostType == 1){
 	    pinkTile[x][y].dir = dir;
+	  }else if(ghostType == 2){
+	    blueTile[x][y].dir = dir;
 	  }
 	  
 	}else if(nodeNeighbour[i]->dir ==2){//if east parent is west
@@ -960,6 +1116,8 @@ void Game::modAStar(int ghostType){
 	    tile[x][y].dir = dir;
 	  }else if(ghostType == 1){
 	    pinkTile[x][y].dir = dir;
+	  }else if(ghostType == 2){
+	    blueTile[x][y].dir = dir;
 	  }
 	 
 	}else if(nodeNeighbour[i]->dir == 3){//if west parent is east
@@ -973,6 +1131,8 @@ void Game::modAStar(int ghostType){
 	    tile[x][y].dir = dir;
 	  }else if(ghostType == 1){
 	    pinkTile[x][y].dir = dir;
+	  }else if(ghostType == 2){
+	    blueTile[x][y].dir = dir;
 	  }
 	}
 	
@@ -1324,6 +1484,42 @@ void Game::InitPinkMoveDir(){
   }
   InitPinkMoveDir();
 }
+//init move dir for blue
+void Game::InitBlueMoveDir(){
+  //for blue ghost
+  //nsew
+  int bnum = GetRandomNum();
+  switch(bnum){
+  case 0:{
+    if(IsValidPath(blueGhost.GetX(),blueGhost.GetY()-1)){
+      blueGhost.Move(0);
+      return;
+    }
+  }break;
+  case 1:{
+    if(IsValidPath(blueGhost.GetX(),blueGhost.GetY()+1)){
+      blueGhost.Move(1);
+      return;
+    }
+  }break;
+  case 2:{
+    if(IsValidPath(blueGhost.GetX()+1,blueGhost.GetY())){
+      blueGhost.Move(2);
+      return;
+    }
+  }break;
+  case 3:{
+    if(IsValidPath(blueGhost.GetX()-1,blueGhost.GetY())){
+      blueGhost.Move(3);
+      return;
+    }
+  }break;
+  default:
+    break;
+  }
+  InitBlueMoveDir();
+}
+
 //conditions for red ghost move seq
 void Game::RedMoveSeq(){
   if(rcount<1){
@@ -1398,6 +1594,44 @@ void Game::PinkMoveSeq(){
     pinkGhost.MoveToDir();
   }
 }
+//move sequence for blue ghost
+void Game::BlueMoveSeq(){
+  if(bcount<1){
+    bFinalTileX = pac.GetX();
+    bFinalTileY = pac.GetY();
+    bcount++;
+  }
+  //check if rached last tile
+  if(blueGhost.GetX()==bFinalTileX && blueGhost.GetY()==bFinalTileY){
+    bReachedLastTile = true;
+    bcount--;
+  }
+  if(bReachedLastTile){
+    bPathFound = false;
+    starReached = false;
+  }
+  if(!bPathFound){
+    BlueInitPathTile();
+    //Before A star
+    //printTile();
+    
+    //SolveAStar();
+    modAStar(2);//1 :blue ghost
+    
+    //printf("Tile After A star\n");
+    //printTile();
+    bPathFound = true;
+  }
+  
+  if(bPathFound){  
+    int x  = blueGhost.GetX();
+    int y =  blueGhost.GetY();
+    int dir = blueTile[x][y].dir;
+    blueGhost.Move(dir);
+    blueGhost.MoveToDir();
+  }
+}
+
 void Game::Update(){
   
   //pacmove
@@ -1411,9 +1645,12 @@ void Game::Update(){
 
       InitMoveDirBeforeScatter();
       InitPinkMoveDir();
+      InitBlueMoveDir();
       
       printf("\nSCATTER MODE\n");
-      ghostMode =0;
+      ghostMode = 0;//for red ghost
+      pGhostMode = 0;//for pink ghost
+      bGhostMode = 0;//for blue ghost
       
     }else if(ghostMode == 0){//hunt mode
       printf("\nHUNT MODE\n");
@@ -1421,9 +1658,19 @@ void Game::Update(){
       if(!rReachedLastTile){
 	rReachedLastTile = true;
       }
-      //for pink ghost
-      if(!pReachedLastTile){
-	pReachedLastTile = true;
+      if(pGhostMode == 0){
+	//for pink ghost
+	if(!pReachedLastTile){
+	  pReachedLastTile = true;
+	}
+	pGhostMode = 1;
+      }
+      //for blue ghost
+      if(bGhostMode == 0){
+	if(!bReachedLastTile){
+	  bReachedLastTile = true;
+	}
+	bGhostMode = 1;
       }
       ghostMode = 1;
     }
@@ -1436,9 +1683,15 @@ void Game::Update(){
   if(ghostMode == 1){
     //for red ghost
     RedMoveSeq();
+  }
+  //for pink ghost
+  if(pGhostMode == 1){
     //for pink ghost
     PinkMoveSeq();
-    
+  }
+  //for blue ghost
+  if(bGhostMode == 1){
+    BlueMoveSeq();
   }
   
   CheckCollision();
@@ -1505,7 +1758,8 @@ void Game::DrawCoin(){
 	if(CheckNeighbours(coin[i][j].x,coin[i][j].y) == 0 &&
 	   coin[i][j].visited == false
 	   ){
-	  DrawCircle(coin[i][j].x*25,coin[i][j].y*25,3,GOLD);
+	  DrawCircle(coin[i][j].x*25,coin[i][j].y*25,3,BLUE);
+	  DrawCircle(coin[i][j].x*25,coin[i][j].y*25,1,WHITE);
 	}
       }
     }
@@ -1518,5 +1772,6 @@ void Game::Draw(){
   pac.Draw();
   ghost.Draw();
   pinkGhost.Draw();
+  blueGhost.Draw();
  
 }

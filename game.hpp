@@ -98,6 +98,14 @@ public:
   void PinkInitPathTile();
   int PinkEastWest();
   int PinkNorthSouth();
+  //for blue ghost
+  void InitBlueMoveDir();
+  void BlueMoveSeq();
+  void BlueInitPathTile();
+  void RoamBlueGhost();
+  bool blueGhostHitWall();
+  int BlueNorthSouth();
+  int BlueEastWest();
 private:  
   //for A*
   
@@ -106,11 +114,9 @@ private:
   
   int tcount =0;
   int wcount = 0;
+  //main list
   std::vector<Node*> list;
   
-
-  int ghostMode = 1;
-
   Ghost ghost;//red ghost
   pathTile tile[40][40];
   int rcount = 0;
@@ -118,6 +124,7 @@ private:
   bool rReachedLastTile = false;
   bool rPathFound = false;
   bool starReached = false;
+  int ghostMode = 0; //  1: hunt
   
   //pink ghost
   Ghost pinkGhost;
@@ -126,6 +133,16 @@ private:
   int pFinalTileX,pFinalTileY;
   bool pReachedLastTile = false;
   bool pPathFound = false;
+  int pGhostMode = 0;
+
+  //blue ghost
+  Ghost blueGhost;
+  pathTile blueTile[40][40];
+  int bcount=0;
+  int bFinalTileX,bFinalTileY;
+  bool bReachedLastTile = false;
+  bool bPathFound = false;
+  int bGhostMode = 0;
   
   //ghost mode 0:scatter 1:atk
   int pacDist;

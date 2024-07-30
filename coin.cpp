@@ -13,5 +13,6 @@ void Coin::SetVal(int x,int y,bool vis){
   this->coin.visible = vis;
 }
 void Coin::Draw(){
-  DrawCircle(coin.x*coin.size,coin.y*coin.size,6,YELLOW);
+  DrawCircle(coin.x*coin.size,coin.y*coin.size,5,LIGHTBLUE)
+  DrawCircle(coin.x*coin.size,coin.y*coin.size,6,WHITE);
 }

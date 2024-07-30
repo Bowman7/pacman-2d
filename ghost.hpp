@@ -68,6 +68,8 @@ public:
       color = RED;
     }else if(col == 1){
       color = PINK;
+    }else if(col == 2){
+      color = SKYBLUE;
     }
   }
  
