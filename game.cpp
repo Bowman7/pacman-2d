@@ -298,6 +298,23 @@ void Game::CheckCollision(){
       pinkGhost.RevertWest();break;
     }
   }
+  //for blue ghost
+  if(maze.IsWalkable(blueGhost.GetX()-1,blueGhost.GetY()-1) ==2 ||
+     maze.IsWalkable(blueGhost.GetX(),blueGhost.GetY()-1) == 2 ||
+     maze.IsWalkable(blueGhost.GetX()-1,blueGhost.GetY()) == 2 ||
+     maze.IsWalkable(blueGhost.GetX(),blueGhost.GetY()) == 2
+     ){
+    switch(blueGhost.GetDir()){
+    case 0:
+      blueGhost.RevertNorth();break;
+    case 1:
+      blueGhost.RevertSouth();break;
+    case 2:
+      blueGhost.RevertEast();break;
+    case 3:
+      blueGhost.RevertWest();break;
+    }
+  }
 }
 //init coin
 void Game::InitCoin(){
@@ -731,19 +748,19 @@ int Game::BlueEastWest(){
   int jY = pac.GetY();
   int dir = pac.GetDir();
   if(dir == 2){//east
-    if(IsValidPath(jX+2,jY)){
-      if(IsValidPath(jX+4,jY)){
-	return jX+4;
-      }
-      return jX+2;
-    }
-    return jX;
-  }else if(dir == 3){//west
     if(IsValidPath(jX-2,jY)){
       if(IsValidPath(jX-4,jY)){
 	return jX-4;
       }
       return jX-2;
+    }
+    return jX;
+  }else if(dir == 3){//west
+    if(IsValidPath(jX+2,jY)){
+      if(IsValidPath(jX+4,jY)){
+	return jX+4;
+      }
+      return jX+2;
     }
     return jX;
   }
@@ -781,19 +798,19 @@ int Game::BlueNorthSouth(){
   int jY = pac.GetY();
   int dir = pac.GetDir();
   if(dir == 0){//north
-    if(IsValidPath(jX,jY-2)){
-      if(IsValidPath(jX,jY-4)){
-	return jY-4;
-      }
-      return jY-2;
-    }
-    return jY;
-  }else if(dir == 1){//south
     if(IsValidPath(jX,jY+2)){
       if(IsValidPath(jX,jY+4)){
 	return jY+4;
       }
       return jY+2;
+    }
+    return jY;
+  }else if(dir == 1){//south
+    if(IsValidPath(jX,jY-2)){
+      if(IsValidPath(jX,jY-4)){
+	return jY-4;
+      }
+      return jY-2;
     }
     return jY;
   }
@@ -1658,6 +1675,7 @@ void Game::Update(){
       if(!rReachedLastTile){
 	rReachedLastTile = true;
       }
+      ghostMode = 1;
       if(pGhostMode == 0){
 	//for pink ghost
 	if(!pReachedLastTile){
@@ -1672,7 +1690,6 @@ void Game::Update(){
 	}
 	bGhostMode = 1;
       }
-      ghostMode = 1;
     }
   }
 
