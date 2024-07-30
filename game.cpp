@@ -611,7 +611,7 @@ void Game::PinkInitPathTile(){
       pinkTile[i][j].x =i;
       pinkTile[i][j].y = j;
       pinkTile[i][j].dir = 9;//5 by def
-      pinkTile[i][j].visited = 0;
+      pinkTile[i][j].visited = false;
     }
   }
 }
@@ -633,67 +633,53 @@ float heuristic(int ax,int ay , int bx,int by){
 
 //check fours steps in east or west
 int Game::PinkEastWest(){
-  int posX = pac.GetX();
-  int posY = pac.GetY();
-  int dir = pinkGhost.GetDir();
-  if(dir == 2){
-    if(IsValidPath(posX+4,posY)){
-      return posX+4;
-    }else if(IsValidPath(posX+3,posY)){
-      return posX+3;
-    }else if(IsValidPath(posX+2,posY)){
-      return posX+2;
-    }else if(IsValidPath(posX+1,posY)){
-      return posX+1;
-    }else{
-      return posX;
+  int jX = pac.GetX();
+  int jY = pac.GetY();
+  int dir = pac.GetDir();
+  if(dir == 2){//east
+    if(IsValidPath(jX+2,jY)){
+      if(IsValidPath(jX+4,jY)){
+	return jY+4;
+      }
+      return jX+2;
     }
-  }else if(dir == 3){
-    if(IsValidPath(posX-4,posY)){
-      return posX-4;
-    }else if(IsValidPath(posX-3,posY)){
-      return posX-3;
-    }else if(IsValidPath(posX-2,posY)){
-      return posX-2;
-    }else if(IsValidPath(posX-1,posY)){
-      return posX-1;
-    }else{
-      return posX;
+    return jX;
+  }else if(dir == 3){//west
+    if(IsValidPath(jX-2,jY)){
+      if(IsValidPath(jX-4,jY)){
+	return jX-4;
+      }
+      return jX-2;
     }
+    return jX;
   }
-  return posX;
+
+  return jX;
 }
 //check three steps in north or south
 int Game::PinkNorthSouth(){
-  int posX = pac.GetX();
-  int posY = pac.GetY();
+  int jX = pac.GetX();
+  int jY = pac.GetY();
   int dir = pac.GetDir();
-  if(dir == 0){
-    if(IsValidPath(posX,posY-4)){
-      return posY-4;
-    }else if(IsValidPath(posX,posY-3)){
-      return posY-3;
-    }else if(IsValidPath(posX,posY-2)){
-      return posY-2;
-    }else if(IsValidPath(posX-1,posY)){
-      return posY-1;
-    }else{
-      return posY;
+  if(dir == 0){//north
+    if(IsValidPath(jX,jY-2)){
+      if(IsValidPath(jX,jY-4)){
+	return jY-4;
+      }
+      return jY-2;
     }
-  }else if(dir == 1){
-    if(IsValidPath(posX,posY+4)){
-      return posY+4;
-    }else if(IsValidPath(posX,posY+3)){
-      return posY+3;
-    }else if(IsValidPath(posX,posY+2)){
-      return posY+2;
-    }else if(IsValidPath(posX,posY+1)){
-      return posY+1;
-    }else{
-      return posY;
+    return jY;
+  }else if(dir == 1){//south
+    if(IsValidPath(jX,jY-2)){
+      if(IsValidPath(jX,jY-4)){
+	return jY-4;
+      }
+      return jY-2;
     }
+    return jY;
   }
-  return posY;
+
+  return jY;
 }
 //modified a* for all ghosts
 void Game::modAStar(int ghostType){
@@ -727,28 +713,36 @@ void Game::modAStar(int ghostType){
   }
   
   Node *nodeStart = new Node;
+  int startPosX;
+  int startPosY;
   if(ghostType == 0){//for red ghost
     nodeStart->x = pac.GetX();
     nodeStart->y = pac.GetY();
+    startPosX = pac.GetX();
+    startPosY = pac.GetY();
   }else if(ghostType == 1){//for pink ghost
-    int posX = pac.GetX();
-    int posY = pac.GetY(); 
+    int jumpPosX = pac.GetX();
+    int jumpPosY = pac.GetY();
     int dir = pac.GetDir();
-    if(dir == 0 || dir == 1){//north
-      posY = PinkNorthSouth();
+    if(dir == 2 || dir == 3){
+      jumpPosX = PinkEastWest();
+    }else if(dir == 0 || dir == 1){
+      jumpPosY = PinkNorthSouth();
     }
-    nodeStart->x = posX;
-    nodeStart->y = posY;
+    nodeStart->x = jumpPosX;
+    nodeStart->y = pac.GetY();
+    startPosX = pac.GetX();
+    startPosY = pac.GetY();
   }
   
   //set the first pointer to the currentNode
   Node *nodeCurrent = nodeStart;
   nodeCurrent->localVal = 0.0f;
-  nodeCurrent->globalVal = heuristic(pac.GetX(),pac.GetY(),ghostPosX,ghostPosY);
+  nodeCurrent->globalVal = heuristic(startPosX,startPosY,ghostPosX,ghostPosY);
   
   list.push_back(nodeStart);
   
-  int  totalIter = abs(ghostPosX-pac.GetX())+abs(ghostPosY-pac.GetY());
+  int  totalIter = abs(ghostPosX-startPosX)+abs(ghostPosY-startPosY);
   //main while loop
   while(!list.empty() && !starReached){
     if(list[0]->x==nodeEnd->x && list[0]->y==nodeEnd->y ){
@@ -788,6 +782,9 @@ void Game::modAStar(int ghostType){
     if(ghostType == 0){
       tile[x][y].visited = true;
     }else if(ghostType == 1){
+      if(wcount<1){
+	//printf("seg fault area: x:%d y:%d \n",x,y);
+      }
       pinkTile[x][y].visited = true;
     }
     if(iter<totalIter){
@@ -1438,7 +1435,7 @@ void Game::Update(){
   }
   if(ghostMode == 1){
     //for red ghost
-    //RedMoveSeq();
+    RedMoveSeq();
     //for pink ghost
     PinkMoveSeq();
     
