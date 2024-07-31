@@ -106,18 +106,31 @@ public:
   bool blueGhostHitWall();
   int BlueNorthSouth();
   int BlueEastWest();
+  //for orange ghost
+  void InitOrangeMoveDir();
+  bool orangeGhostHitWall();
+  void RoamOrangeGhost();
+  void OrangeScatter();
 private:  
-  //for A*
-  
+
   int iter = 0;
-  int dist;
-  
+  int dist;  
   int tcount =0;
   int wcount = 0;
   //main list
   std::vector<Node*> list;
   
-  Ghost ghost;//red ghost
+  //orange ghost
+  Ghost orangeGhost;
+  pathTile orangeTile[40][40];
+  int ocount = 0;
+  int oFinalTileX,oFinalTileY;
+  bool oReachedLastTile = false;
+  bool oPathFound = false;
+  int oGhostMode = 0;
+
+  //red ghost
+  Ghost ghost;
   pathTile tile[40][40];
   int rcount = 0;
   int rFinalTileX,rFinalTileY;
@@ -144,10 +157,6 @@ private:
   bool bPathFound = false;
   int bGhostMode = 0;
 
-  //orange ghost
-  Ghost orangeGhost;
-  pathTile orangeTile[40][40];
-  int ocount = 0;
   
   //ghost mode 0:scatter 1:atk
   int pacDist;

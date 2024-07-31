@@ -63,13 +63,15 @@ public:
     x+=1;
   }
   void SetColor(int col){
-    //0: red 1: pink
+    //0: red 1: pink 2: blue 3: orange
     if(col == 0){
       color = RED;
     }else if(col == 1){
       color = PINK;
     }else if(col == 2){
       color = SKYBLUE;
+    }else if(col == 3){
+      color = ORANGE;
     }
   }
  

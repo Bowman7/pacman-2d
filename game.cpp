@@ -17,6 +17,13 @@ Game::Game(){
   blueGhost.SetColor(2);
   blueGhost.SetX(38);
   blueGhost.SetY(2);
+  
+  //orange ghost init
+  orangeGhost.SetColor(3);
+  orangeGhost.SetX(20);
+  orangeGhost.SetY(20);
+  
+  //for packnight
   pac.SetX(2);
   pac.SetY(2);
 }
@@ -368,6 +375,9 @@ bool Game::IsNextDirValid(int val,int ghostType){
   }else if(ghostType == 2){//blue ghost
     valX = blueGhost.GetX();
     valY = blueGhost.GetY();
+  }else if(ghostType == 3){//for orange ghost
+    valX = orangeGhost.GetX();
+    valY = orangeGhost.GetY();
   }
   //north
   if(val == 0){
@@ -404,6 +414,8 @@ bool Game::NoBounceback(int val,int ghostType){
     dir = pinkGhost.GetDir();
   }else if(ghostType == 2){//for blue ghost
     dir = blueGhost.GetDir();
+  }else if(ghostType == 3){//for orange ghost
+    dir = orangeGhost.GetDir();
   }
   //north
   if(dir==0 && val==1){
@@ -545,6 +557,43 @@ bool Game::blueGhostHitWall(){
   }
   return false;
 }
+//check for orange ghost hitting wall
+bool Game::orangeGhostHitWall(){  
+  //for orange ghost
+  switch(orangeGhost.GetDir()){
+  case 0:
+    {//north
+      if(!IsValidPath(orangeGhost.GetX(),orangeGhost.GetY()-1)){
+	//printf("Hits north wall\n");
+	return true;
+      }
+    }break;
+  case 1:
+    {//south
+      if(!IsValidPath(orangeGhost.GetX(),orangeGhost.GetY()+1)){
+	//printf("Hits south wall\n");
+	return true;
+      }
+    }break;
+  case 2:
+    {//east
+      if(!IsValidPath(orangeGhost.GetX()+1,orangeGhost.GetY())){
+	//printf("Hits east wall\n");
+	return true;
+      }
+    }break;
+  case 3:
+    {//west
+      if(!IsValidPath(orangeGhost.GetX()-1,orangeGhost.GetY())){
+	//printf("Hits west wall\n");
+	return true;
+      }
+    }break;
+  default:
+    return false;
+  }
+  return false;
+}
 //roam red ghost
 void Game::RoamGhost(){
   int num = GetNum(0);//0 for red ghost
@@ -561,6 +610,12 @@ void Game::RoamBlueGhost(){
   int bnum = GetNum(2);//for 2 for blue ghost
   blueGhost.Move(bnum);
 }
+//roam orange ghost
+void Game::RoamOrangeGhost(){//3 for orange ghost
+  int onum = GetNum(3);
+  orangeGhost.Move(onum);
+}
+
 //ghost scatter mode
 void Game::GhostScatter(){
   //for red ghost
@@ -576,11 +631,21 @@ void Game::GhostScatter(){
   if(blueGhostHitWall()){
     RoamBlueGhost();
   }
+  
   //move to pointed directions
   ghost.MoveToDir();
   pinkGhost.MoveToDir();
   blueGhost.MoveToDir();
   
+}
+//dscatter only for orange ghost
+void Game::OrangeScatter(){
+  //for orange ghost
+  if(orangeGhostHitWall()){
+    RoamOrangeGhost();
+  }
+
+  orangeGhost.MoveToDir();
 }
 //is pacmna near boundry
 bool Game::IsPacNear(){
@@ -876,8 +941,8 @@ void Game::modAStar(int ghostType){
     }
     nodeStart->x = jumpPosX;
     nodeStart->y = jumpPosY;
-    startPosX = pac.GetX();
-    startPosY = pac.GetY();
+    startPosX = jumpPosX;
+    startPosY = jumpPosY;
     
   }else if(ghostType == 2){//for blue
     int jumpPosX = pac.GetX();
@@ -890,8 +955,8 @@ void Game::modAStar(int ghostType){
     }
     nodeStart->x = jumpPosX;
     nodeStart->y = jumpPosY;
-    startPosX = pac.GetX();
-    startPosY = pac.GetY();
+    startPosX = jumpPosX;
+    startPosY = jumpPosY;
   }
   
   //set the first pointer to the currentNode
@@ -1536,7 +1601,41 @@ void Game::InitBlueMoveDir(){
   }
   InitBlueMoveDir();
 }
-
+//init orange move dir
+void Game::InitOrangeMoveDir(){
+  //for orange ghost
+  //nsew
+  int onum = GetRandomNum();
+  switch(onum){
+  case 0:{
+    if(IsValidPath(orangeGhost.GetX(),orangeGhost.GetY()-1)){
+      orangeGhost.Move(0);
+      return;
+    }
+  }break;
+  case 1:{
+    if(IsValidPath(orangeGhost.GetX(),orangeGhost.GetY()+1)){
+      orangeGhost.Move(1);
+      return;
+    }
+  }break;
+  case 2:{
+    if(IsValidPath(orangeGhost.GetX()+1,orangeGhost.GetY())){
+      orangeGhost.Move(2);
+      return;
+    }
+  }break;
+  case 3:{
+    if(IsValidPath(orangeGhost.GetX()-1,orangeGhost.GetY())){
+      orangeGhost.Move(3);
+      return;
+    }
+  }break;
+  default:
+    break;
+  }
+  InitOrangeMoveDir();
+}
 //conditions for red ghost move seq
 void Game::RedMoveSeq(){
   if(rcount<1){
@@ -1663,6 +1762,7 @@ void Game::Update(){
       InitMoveDirBeforeScatter();
       InitPinkMoveDir();
       InitBlueMoveDir();
+      //InitOrangeMoveDir();
       
       printf("\nSCATTER MODE\n");
       ghostMode = 0;//for red ghost
@@ -1709,6 +1809,9 @@ void Game::Update(){
   //for blue ghost
   if(bGhostMode == 1){
     BlueMoveSeq();
+  }
+  if(oGhostMode == 0){
+    OrangeScatter();
   }
   
   CheckCollision();
@@ -1790,5 +1893,6 @@ void Game::Draw(){
   ghost.Draw();
   pinkGhost.Draw();
   blueGhost.Draw();
+  orangeGhost.Draw();
  
 }
