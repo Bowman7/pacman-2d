@@ -146,6 +146,8 @@ private:
 
   //orange ghost
   Ghost orangeGhost;
+  pathTile orangeTile[40][40];
+  int ocount = 0;
   
   //ghost mode 0:scatter 1:atk
   int pacDist;
