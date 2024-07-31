@@ -19,14 +19,15 @@ bool Pac::EventTriggered(double time){
 //move
 void Pac::Move(int val){
   switch(val){
-  case 1:
+  case 0:
     dir = n;break;
-  case 2:
+  case 1:
     dir = s;break;
-  case 3:
+  case 2:
     dir = e;break;
-  case 4:
-    dir = w;break;
+  case 3:
+    dir = w;
+    break;
   default:
     break;
   }
