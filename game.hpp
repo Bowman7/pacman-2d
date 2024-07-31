@@ -143,6 +143,9 @@ private:
   bool bReachedLastTile = false;
   bool bPathFound = false;
   int bGhostMode = 0;
+
+  //orange ghost
+  Ghost orangeGhost;
   
   //ghost mode 0:scatter 1:atk
   int pacDist;
