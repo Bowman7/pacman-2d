@@ -113,6 +113,11 @@ public:
   void OrangeScatter();
 private:  
 
+  //for pacman running
+  int curDir;
+  int nextDir;
+  bool nextDirPresent = false;
+  
   int iter = 0;
   int dist;  
   int tcount =0;

@@ -1749,9 +1749,32 @@ void Game::BlueMoveSeq(){
 }
 
 void Game::Update(){
-  
-  //pacmove
-  pac.MoveToDir();
+
+  //move pacman
+  if(nextDirPresent){
+    //for east
+    if(IsValidPath(pac.GetX()+1,pac.GetY()) && IsValidPath(pac.GetX()-1,pac.GetY()) ||
+       IsValidPath(pac.GetX()+1,pac.GetY()) && !IsValidPath(pac.GetX()-1,pac.GetY())
+       ){
+      {
+	pac.Move(nextDir);
+	nextDirPresent = false;
+      }
+    }
+    //for west
+    else if(IsValidPath(pac.GetX()-1,pac.GetY()) && IsValidPath(pac.GetX()+1,pac.GetY()) ||
+       IsValidPath(pac.GetX()-1,pac.GetY()) && !IsValidPath(pac.GetX()+1,pac.GetY())
+       ){
+      {
+	pac.Move(nextDir);
+	nextDirPresent = false;
+      }
+    }
+    
+    pac.MoveToDir();
+  }else{
+    pac.MoveToDir();
+  }
 
   
   //change mode to scatter :0 for scatter , 1 for hunt
@@ -1795,23 +1818,23 @@ void Game::Update(){
 
   //modes
   if(ghostMode == 0){
-    GhostScatter();
+    //GhostScatter();
   }
   if(ghostMode == 1){
     //for red ghost
-    RedMoveSeq();
+    //RedMoveSeq();
   }
   //for pink ghost
   if(pGhostMode == 1){
     //for pink ghost
-    PinkMoveSeq();
+    //PinkMoveSeq();
   }
   //for blue ghost
   if(bGhostMode == 1){
-    BlueMoveSeq();
+    //BlueMoveSeq();
   }
   if(oGhostMode == 0){
-    OrangeScatter();
+    //OrangeScatter();
   }
   
   CheckCollision();
@@ -1825,30 +1848,39 @@ void Game::HandleInputs(){
   //north
   if(IsKeyPressed(KEY_W)){
     if(IsValidPath(pac.GetX(),pac.GetY()-1)){
-      pac.Move(1);
-      count--;
+      
+      pac.Move(0);   
     }
   }
   //south
   if(IsKeyPressed(KEY_S)){
     if(IsValidPath(pac.GetX(),pac.GetY()+1)){
-      pac.Move(2);
-      count--;
+      pac.Move(1);
+      
     }
   }
   
   //east
   if(IsKeyPressed(KEY_D)){
+    curDir = pac.GetDir();
+    nextDir == 2;
+    if(curDir != nextDir){
+      nextDirPresent = true;
+    }
     if(IsValidPath(pac.GetX()+1,pac.GetY())){
-      pac.Move(3);
-      count--;
+      pac.Move(2);
+      
     }
   }
   //west
   if(IsKeyPressed(KEY_A)){
+    curDir = pac.GetDir();
+    nextDir = 3;
+    if(curDir != nextDir){
+      nextDirPresent = true;
+    }
     if(IsValidPath(pac.GetX()-1,pac.GetY())){
-      pac.Move(4);
-      count--;
+      pac.Move(3);
     }
   }
   //FOR GHOST

@@ -78,5 +78,6 @@ private:
   int y;
   int lives;
   direction dir;
+  direction nextDir;
   double lastUpdatedTime=0.0;
 };
