@@ -38,13 +38,13 @@ public:
   int GetDir(){
     switch(dir){
     case n:
-      return 1;break;
+      return 0;break;
     case s:
-      return 2;break;
+      return 1;break;
     case e:
-      return 3;break;
+      return 2;break;
     case w:
-      return 4;break;
+      return 3;break;
     default:
       break;
     }

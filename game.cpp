@@ -260,15 +260,20 @@ void Game::CheckCollision(){
      maze.IsWalkable(pac.GetX()-1,pac.GetY()) == 2 ||
      maze.IsWalkable(pac.GetX(),pac.GetY()) == 2
      ){
+    IsCollideWall= true;
     switch(pac.GetDir()){
+    case 0:
+      pac.RevertNorth();
+      break;
     case 1:
-      pac.RevertNorth();break;
+      pac.RevertSouth();
+      break;
     case 2:
-      pac.RevertSouth();break;
+      pac.RevertEast();
+      break;
     case 3:
-      pac.RevertEast();break;
-    case 4:
-      pac.RevertWest();break;
+      pac.RevertWest();
+      break;
     }
   }
   //for redghost
@@ -279,13 +284,18 @@ void Game::CheckCollision(){
      ){
     switch(ghost.GetDir()){
     case 0:
-      ghost.RevertNorth();break;
+      ghost.RevertNorth();
+     
+      break;
     case 1:
-      ghost.RevertSouth();break;
+      ghost.RevertSouth();
+      break;
     case 2:
-      ghost.RevertEast();break;
+      ghost.RevertEast();
+      break;
     case 3:
-      ghost.RevertWest();break;
+      ghost.RevertWest();
+      break;
     }
   }
   //for pink ghost
@@ -1749,34 +1759,42 @@ void Game::BlueMoveSeq(){
 }
 
 void Game::Update(){
-
-  //move pacman
-  if(nextDirPresent){
-    //for east
-    if(IsValidPath(pac.GetX()+1,pac.GetY()) && IsValidPath(pac.GetX()-1,pac.GetY()) ||
-       IsValidPath(pac.GetX()+1,pac.GetY()) && !IsValidPath(pac.GetX()-1,pac.GetY())
-       ){
-      {
-	pac.Move(nextDir);
-	nextDirPresent = false;
-      }
+  
+  if(nextDirWPresent){//west
+    printf("Flag active check for next left\n");
+    if(IsValidPath(pac.GetX()-1,pac.GetY())){
+      pac.Move(3);
+      printf("Moved to west  and flag is off\n");
+      nextDirWPresent = false;
     }
-    //for west
-    else if(IsValidPath(pac.GetX()-1,pac.GetY()) && IsValidPath(pac.GetX()+1,pac.GetY()) ||
-       IsValidPath(pac.GetX()-1,pac.GetY()) && !IsValidPath(pac.GetX()+1,pac.GetY())
-       ){
-      {
-	pac.Move(nextDir);
-	nextDirPresent = false;
-      }
+    pac.MoveToDir();
+  }else if(nextDirEPresent){//east
+    printf("Flag active check for next left\n");
+    if(IsValidPath(pac.GetX()+1,pac.GetY())){
+      pac.Move(2);
+      printf("Moved to west  and flag is off\n");
+      nextDirEPresent = false;
     }
-    
+    pac.MoveToDir();
+  }else if(nextDirNPresent){//north
+    printf("Flag active check for next left\n");
+    if(IsValidPath(pac.GetX(),pac.GetY()-1)){
+      pac.Move(0);
+      printf("Moved to west  and flag is off\n");
+      nextDirNPresent = false;
+    }
+    pac.MoveToDir();
+  }else if(nextDirSPresent){//south
+    printf("Flag active check for next left\n");
+    if(IsValidPath(pac.GetX(),pac.GetY()+1)){
+      pac.Move(1);
+      printf("Moved to west  and flag is off\n");
+      nextDirSPresent = false;
+    }
     pac.MoveToDir();
   }else{
     pac.MoveToDir();
   }
-
-  
   //change mode to scatter :0 for scatter , 1 for hunt
   if(ModeTriggered(5.0)){
     //change to scatter
@@ -1847,42 +1865,111 @@ void Game::HandleInputs(){
   //n:1,S:2,E:3,W:4
   //north
   if(IsKeyPressed(KEY_W)){
+    nextDirEPresent = false;
+    nextDirWPresent = false;
+    nextDirSPresent = false;
+    curDir = pac.GetDir();
+    nextDir = 0;
     if(IsValidPath(pac.GetX(),pac.GetY()-1)){
+      pac.Move(0);
+    }
+    else if(curDir != nextDir){/*
+      if(IsValidPath(pac.GetX()-4,pac.GetY()-1)){
+	nextDirNPresent = true;
+      }else if(IsValidPath(pac.GetX()-3,pac.GetY()-1)){
+	nextDirNPresent = true;
+      }else if(IsValidPath(pac.GetX()-2,pac.GetY()-1)){
+	nextDirNPresent = true;	
+      }else if(IsValidPath(pac.GetX()-1,pac.GetY()-1)){
+	nextDirNPresent = true;
+      }
+			       */
+      nextDirNPresent = true;
       
-      pac.Move(0);   
     }
   }
   //south
   if(IsKeyPressed(KEY_S)){
+    nextDirWPresent = false;
+    nextDirNPresent = false;
+    nextDirEPresent = false;
+    curDir = pac.GetDir();
+    nextDir = 1;
     if(IsValidPath(pac.GetX(),pac.GetY()+1)){
       pac.Move(1);
-      
+    }else if(curDir != nextDir){
+      /*
+      if(IsValidPath(pac.GetX()+4,pac.GetY()+1)){
+	nextDirSPresent = true;
+      }else if(IsValidPath(pac.GetX()+3,pac.GetY()+1)){
+	nextDirSPresent = true;
+      }else if(IsValidPath(pac.GetX()+2,pac.GetY()+1)){
+	nextDirSPresent = true;	
+      }else if(IsValidPath(pac.GetX()+1,pac.GetY()+1)){
+	nextDirSPresent = true;
+      }
+      */
+      nextDirSPresent = true;
     }
   }
   
   //east
   if(IsKeyPressed(KEY_D)){
+    nextDirWPresent = false;
+    nextDirNPresent = false;
+    nextDirSPresent = false;
     curDir = pac.GetDir();
-    nextDir == 2;
-    if(curDir != nextDir){
-      nextDirPresent = true;
-    }
+    nextDir = 2;
     if(IsValidPath(pac.GetX()+1,pac.GetY())){
       pac.Move(2);
-      
+    } //south
+    else if(curDir != nextDir){
+      /*
+      if(IsValidPath(pac.GetX()+1,pac.GetY()+4)){
+	nextDirEPresent = true;
+      }else if(IsValidPath(pac.GetX()+1,pac.GetY()+3)){
+	nextDirEPresent = true;
+      }else if(IsValidPath(pac.GetX()+1,pac.GetY()+2)){
+	nextDirEPresent = true;	
+      }else if(IsValidPath(pac.GetX()+1,pac.GetY()+1)){
+	nextDirEPresent = true;
+      }
+      */
+      nextDirEPresent = true;
     }
   }
   //west
   if(IsKeyPressed(KEY_A)){
+    nextDirEPresent = false;
+    nextDirNPresent = false;
+    nextDirSPresent = false;
     curDir = pac.GetDir();
     nextDir = 3;
-    if(curDir != nextDir){
-      nextDirPresent = true;
+    if(tcount<1){
+      printf("Wall collision: %d\n",IsCollideWall);
+      printf("Cur dir : %d nextdir: %d\n",curDir,nextDir);
     }
     if(IsValidPath(pac.GetX()-1,pac.GetY())){
       pac.Move(3);
     }
+    //south
+    else if(curDir != nextDir){
+      /*
+      if(IsValidPath(pac.GetX()-1,pac.GetY()+4)){
+	nextDirWPresent = true;
+      }else if(IsValidPath(pac.GetX()-1,pac.GetY()+3)){
+	nextDirWPresent = true;
+      }else if(IsValidPath(pac.GetX()-1,pac.GetY()+2)){
+	nextDirWPresent = true;
+      }else if(IsValidPath(pac.GetX()-1,pac.GetY()+1)){
+	nextDirWPresent = true;
+	}*/
+      nextDirWPresent = true;
+    }
+   
+    
   }
+  
   //FOR GHOST
   if(IsKeyPressed(KEY_UP)){
     pinkGhost.Move(0);
