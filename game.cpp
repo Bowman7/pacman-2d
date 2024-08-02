@@ -26,6 +26,20 @@ Game::Game(){
   //for packnight
   pac.SetX(2);
   pac.SetY(2);
+  pacHealth = 5;
+  shield = 0;
+  //count spirits
+  for(int i=0;i<40;i++){
+    for(int j=0;j<40;j++){
+      if(maze.IsWalkable(coin[i][j].x,coin[i][j].y) == 1){
+	if(CheckNeighbours(coin[i][j].x,coin[i][j].y) == 0 &&
+	   coin[i][j].visited == false
+	   ){
+	  totalSpirit++;
+	}
+      }
+    }
+  }
 }
 
 Game::~Game(){
@@ -1757,38 +1771,265 @@ void Game::BlueMoveSeq(){
     blueGhost.MoveToDir();
   }
 }
+//check if any ghsot ate pacman
+void Game::UpdateHealth(){
+  //for red
+  if(ghost.GetX() == pac.GetX() && ghost.GetY() == pac.GetY()){
+    if(shield>0){
+      shield--;
+    }else{
+      pacHealth--;
+    }
+    int dir =pac.GetDir();
+    switch(dir){
+    case 0:{//north
+      int ny =pac.GetY()-1;
+      pac.SetY(ny);}break;
+    case 1:{//south
+      int sy = pac.GetY()+1;
+      pac.SetY(sy);}break;
+    case 2:{//east
+      int ex =pac.GetX()+1;
+      pac.SetX(ex);}break;
+    case 3:{
+      int wx =pac.GetX()-1;
+      pac.SetX(wx);}break;
+    default:
+      break;
+    }
+  }
+  //for pink
+  else if(pinkGhost.GetX() == pac.GetX() && pinkGhost.GetY() == pac.GetY()){
+    if(shield>0){
+      shield--;
+    }else{
+      pacHealth--;
+    }
+    int dir =pac.GetDir();
+    switch(dir){
+    case 0:{//north
+      int ny =pac.GetY()-1;
+      pac.SetY(ny);}break;
+    case 1:{//south
+      int sy = pac.GetY()+1;
+      pac.SetY(sy);}break;
+    case 2:{//east
+      int ex =pac.GetX()+1;
+      pac.SetX(ex);}break;
+    case 3:{
+      int wx =pac.GetX()-1;
+      pac.SetX(wx);}break;
+    default:
+      break;
+    }
+  }
+  //for blue
+  else if(blueGhost.GetX() == pac.GetX() && blueGhost.GetY() == pac.GetY()){
+    if(shield>0){
+      shield--;
+    }else{
+      pacHealth--;
+    }
+    int dir =pac.GetDir();
+    switch(dir){
+    case 0:{//north
+      int ny =pac.GetY()-1;
+      pac.SetY(ny);}break;
+    case 1:{//south
+      int sy = pac.GetY()+1;
+      pac.SetY(sy);}break;
+    case 2:{//east
+      int ex =pac.GetX()+1;
+      pac.SetX(ex);}break;
+    case 3:{
+      int wx =pac.GetX()-1;
+      pac.SetX(wx);}break;
+    default:
+      break;
+    }
+  }
+  //for orange
+  if(orangeGhost.GetX() == pac.GetX() && orangeGhost.GetY() == pac.GetY()){
+    if(shield>0){
+      shield--;
+    }else{
+      pacHealth--;
+    }
+    int dir =pac.GetDir();
+    switch(dir){
+    case 0:{//north
+      int ny =pac.GetY()-1;
+      pac.SetY(ny);}break;
+    case 1:{//south
+      int sy = pac.GetY()+1;
+      pac.SetY(sy);}break;
+    case 2:{//east
+      int ex =pac.GetX()+1;
+      pac.SetX(ex);}break;
+    case 3:{
+      int wx =pac.GetX()-1;
+      pac.SetX(wx);}break;
+    default:
+      break;
+    }
+  }
+}
+//check if game won or over
+void Game::CheckWonOrOver(){
+  if(pacHealth<1){
+    gameOver = true;
+  }
+  if(eatenSpirits == totalSpirit){
+    gameWon= true;
+  }
+}
+//init after restart
+void Game::GameInit(){
+  InitCoin();
 
+  //red ghost init
+  ghost.SetColor(0);//red
+  ghost.SetX(38);
+  ghost.SetY(38);
+
+  //pink ghost init
+  pinkGhost.SetColor(1);
+  pinkGhost.SetX(2);
+  pinkGhost.SetY(38);
+
+  //blue ghost init
+  blueGhost.SetColor(2);
+  blueGhost.SetX(38);
+  blueGhost.SetY(2);
+  
+  //orange ghost init
+  orangeGhost.SetColor(3);
+  orangeGhost.SetX(20);
+  orangeGhost.SetY(20);
+  
+  //for packnight
+  pac.SetX(2);
+  pac.SetY(2);
+  pacHealth = 5;
+  
+  gameOver = false;
+  gameWon = false;
+  eatenSpirits = 0;
+  totalSpirit = 0;
+  //count psirits
+  //count spirits
+  for(int i=0;i<40;i++){
+    for(int j=0;j<40;j++){
+      if(maze.IsWalkable(coin[i][j].x,coin[i][j].y) == 1){
+	if(CheckNeighbours(coin[i][j].x,coin[i][j].y) == 0 &&
+	   coin[i][j].visited == false
+	   ){
+	  totalSpirit++;
+	}
+      }
+    }
+  }
+}
+//draw health
+void Game::DrawHealth(){
+  int base = 1050;
+  for(int i=1;i<=pacHealth;i++){
+    DrawRectangle(base,30,30,30,RED);
+    base +=32;
+  }
+}
+//update eaten spirits
+void Game::UpdateEatenSpirits(){
+  int x =pac.GetX();
+  int y = pac.GetY();
+  int totalTrue=0;
+  for(int i=0;i<40;i++){
+    for(int j=0;j<40;j++){
+      if(coin[i][j].visited == true){
+	totalTrue++;
+      }
+    }
+  }
+  eatenSpirits = totalTrue;
+}
+//checl shidl spawn time elapsed
+bool Game::ShieldSpawn(double time){
+  double currentTime = GetTime();
+  if(currentTime-lastUpdatedShield >= time){
+    lastUpdatedShield = currentTime;
+    return true;
+  }
+  return false;
+}
+//draw shield
+void Game::DrawShield(){
+  if(shieldActive){
+    DrawRectangle(20*25,20*25,25,25,WHITE);
+  }
+  int posx = 1050;
+  int posy = 70;
+  for(int i=0;i<shield;i++){
+    DrawRectangle(posx,posy,25,25,WHITE);
+    posx+=30;
+  }
+}
 void Game::Update(){
+  //update pac
+  pac.Update();
+  //check for shield spawn
+  if(ShieldSpawn(5.0)){
+    if(!shieldActive && shield<3){
+      shieldActive = true;
+    }
+  }
+  //check if ate
+  if(pac.GetX() == 20 && pac.GetY()==20){
+    if(shieldActive){
+      printf("Eaten shield\n");
+      shieldActive = false;
+      shield++;
+      
+    }
+  }
+  //check total spirits
+  //printf("Total spirits: %d\n",totalSpirit);
+  UpdateEatenSpirits();
+  //printf("Eaten spirits: %d\n",eatenSpirits);
+  
+  //print pacman health
+  //UpdateHealth();
+  //check if health over
+  CheckWonOrOver();
   
   if(nextDirWPresent){//west
-    printf("Flag active check for next left\n");
+    //printf("Flag active check for next left\n");
     if(IsValidPath(pac.GetX()-1,pac.GetY())){
       pac.Move(3);
-      printf("Moved to west  and flag is off\n");
+      //printf("Moved to west  and flag is off\n");
       nextDirWPresent = false;
     }
     pac.MoveToDir();
   }else if(nextDirEPresent){//east
-    printf("Flag active check for next left\n");
+    //printf("Flag active check for next left\n");
     if(IsValidPath(pac.GetX()+1,pac.GetY())){
       pac.Move(2);
-      printf("Moved to west  and flag is off\n");
+      //printf("Moved to west  and flag is off\n");
       nextDirEPresent = false;
     }
     pac.MoveToDir();
   }else if(nextDirNPresent){//north
-    printf("Flag active check for next left\n");
+    //printf("Flag active check for next left\n");
     if(IsValidPath(pac.GetX(),pac.GetY()-1)){
       pac.Move(0);
-      printf("Moved to west  and flag is off\n");
+      //printf("Moved to west  and flag is off\n");
       nextDirNPresent = false;
     }
     pac.MoveToDir();
   }else if(nextDirSPresent){//south
-    printf("Flag active check for next left\n");
+    //printf("Flag active check for next left\n");
     if(IsValidPath(pac.GetX(),pac.GetY()+1)){
       pac.Move(1);
-      printf("Moved to west  and flag is off\n");
+      //printf("Moved to west  and flag is off\n");
       nextDirSPresent = false;
     }
     pac.MoveToDir();
@@ -1836,23 +2077,23 @@ void Game::Update(){
 
   //modes
   if(ghostMode == 0){
-    //GhostScatter();
+    GhostScatter();
   }
   if(ghostMode == 1){
     //for red ghost
-    //RedMoveSeq();
+    RedMoveSeq();
   }
   //for pink ghost
   if(pGhostMode == 1){
     //for pink ghost
-    //PinkMoveSeq();
+    PinkMoveSeq();
   }
   //for blue ghost
   if(bGhostMode == 1){
-    //BlueMoveSeq();
+    BlueMoveSeq();
   }
   if(oGhostMode == 0){
-    //OrangeScatter();
+    OrangeScatter();
   }
   
   CheckCollision();
@@ -1946,8 +2187,8 @@ void Game::HandleInputs(){
     curDir = pac.GetDir();
     nextDir = 3;
     if(tcount<1){
-      printf("Wall collision: %d\n",IsCollideWall);
-      printf("Cur dir : %d nextdir: %d\n",curDir,nextDir);
+      //printf("Wall collision: %d\n",IsCollideWall);
+      //printf("Cur dir : %d nextdir: %d\n",curDir,nextDir);
     }
     if(IsValidPath(pac.GetX()-1,pac.GetY())){
       pac.Move(3);
@@ -2013,5 +2254,7 @@ void Game::Draw(){
   pinkGhost.Draw();
   blueGhost.Draw();
   orangeGhost.Draw();
+  DrawHealth();
+  DrawShield();
  
 }

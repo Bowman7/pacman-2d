@@ -72,6 +72,7 @@ public:
   void SetMoving(){
     moving = true;
   }
+  bool IsUpdateFrameTime(double);
 private:
   bool moving =false;
   int x;
@@ -80,4 +81,12 @@ private:
   direction dir;
   direction nextDir;
   double lastUpdatedTime=0.0;
+  //for texture
+  Image pac_image;
+  Texture2D pac_texture;
+  Rectangle frameRec;
+  Vector2 position;
+  int currentFrame = 0;
+  double lastUpdateFrame = 0.0f;
+  
 };
