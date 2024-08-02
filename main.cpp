@@ -1,6 +1,6 @@
 #include"raylib.h"
 
-#define WIDTH 1000
+#define WIDTH 1300
 #define HEIGHT 1000
 
 #include"game.hpp"
@@ -10,7 +10,10 @@ enum State{
   STARTCUTSCENE,
   GAMEPLAY,
   GAMEOVER,
-  GAMEWON
+  GAMEWON,
+  CUTSCENE_ONE,
+  CUTSCENE_TWO,
+  CUTSCENE_THREE
 };
 int main(){
   //init window
@@ -18,8 +21,11 @@ int main(){
   SetTargetFPS(60);
 
   State currentState = STARTWINDOW;
-
+  //main game obj
   Game game;
+  //levels
+  int level = 0;
+  //main loop
   while(!WindowShouldClose()){
     switch(currentState){
     case STARTWINDOW:{
@@ -33,11 +39,59 @@ int main(){
       }
     }break;
     case GAMEPLAY:{
+      printf("In gameplay\n");
+      //skip
+      if(IsKeyPressed(KEY_ENTER)){
+	level++;
+	if(level == 1){
+	currentState = CUTSCENE_ONE;
+	}else if(level ==2){
+	  currentState = CUTSCENE_TWO;
+	}else if(level ==3){
+	  currentState = CUTSCENE_THREE;
+	}
+      }
+      //check for game won
+      if(game.IsGameWon()){
+	//init game
+	game.GameInit();
+	level++;
+	if(level == 1){
+	  currentState = CUTSCENE_ONE;
+	}else if(level == 2){
+	  currentState = CUTSCENE_TWO;
+	}else if(level == 3){
+	  currentState == CUTSCENE_THREE;
+	}else if(level = 4){
+	  currentState = GAMEWON;
+	}
+      }
+      //check for game over
+      if(game.IsGameOver()){
+	//init game
+	game.GameInit();
+	currentState = GAMEOVER;
+      }
       //handle input
       game.HandleInputs();
       //update
       game.Update();
       
+    }break;
+    case CUTSCENE_ONE:{
+      if(IsKeyPressed(KEY_ENTER)){
+	currentState = GAMEPLAY;
+      }
+    }break;
+    case CUTSCENE_TWO:{
+      if(IsKeyPressed(KEY_ENTER)){
+	currentState = GAMEPLAY;
+      }
+    }break;
+    case CUTSCENE_THREE:{
+      if(IsKeyPressed(KEY_ENTER)){
+	currentState = GAMEPLAY;
+      }
     }break;
     case GAMEOVER:{
       if(IsKeyPressed(KEY_ENTER)){
@@ -56,7 +110,7 @@ int main(){
     
     //draw
     BeginDrawing();
-    ClearBackground(BLUE);
+    ClearBackground(BLACK);
 
     switch(currentState){
     case STARTWINDOW:{
@@ -66,10 +120,36 @@ int main(){
       DrawText("Start cutscene",20,20,40,WHITE);
     }break;
     case GAMEPLAY:{
+      
       game.Draw();
+      if(level==0){
+	DrawText("LEVEL ZERO",20,20,40,WHITE);
+      }
+      if(level == 1){
+	DrawText("LEVEL ONE",20,20,40,WHITE);
+      }
+      if(level == 2){
+	DrawText("LEVEL TWO",20,20,40,WHITE);
+      }
+      if(level == 3){
+	DrawText("LEVEL THREE",20,20,40,WHITE);
+      }
+    
     }break;
+    case CUTSCENE_ONE:
+      {
+	DrawText("Cutscene one",20,20,40,WHITE);
+      }break;
+    case CUTSCENE_TWO:
+      {
+	DrawText("Cutscene two",20,20,40,WHITE);
+      }break;
+    case CUTSCENE_THREE:
+      {
+	DrawText("Cutscene three",20,20,40,WHITE);
+      }break;
     case GAMEOVER:{
-      DrawText("Game over",20,20,40,WHITE);
+      DrawText("Game over rrrr ",20,20,40,WHITE);
     }break;
     case GAMEWON:{
       DrawText("Game won",20,20,40,WHITE);

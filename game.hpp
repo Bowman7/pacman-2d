@@ -111,8 +111,37 @@ public:
   bool orangeGhostHitWall();
   void RoamOrangeGhost();
   void OrangeScatter();
-private:  
-
+  //for health pacman
+  void UpdateHealth();
+  void DrawHealth();
+  void CheckWonOrOver();
+  bool IsGameOver(){
+    return gameOver;
+  }
+  bool IsGameWon(){
+    return gameWon;
+  }
+  
+  //init game after game over
+  void GameInit();
+  void UpdateEatenSpirits();
+  //bool
+  bool ShieldSpawn(double);
+  void DrawShield();
+private:
+  //for shield
+  double lastUpdatedShield= 0.0f;
+  bool shieldActive = false;
+  int shield;
+  //spirits
+  int eatenSpirits=0;
+  int totalSpirit;
+  bool CollectedAllSouls = false;
+  //check gameown or over
+  bool gameOver = false;
+  bool gameWon = false;
+  //health
+  int pacHealth;
   //for pacman running
   int curDir;
   int nextDir;
