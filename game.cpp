@@ -1974,6 +1974,8 @@ void Game::DrawShield(){
   }
 }
 void Game::Update(){
+  //update pac
+  pac.Update();
   //check for shield spawn
   if(ShieldSpawn(5.0)){
     if(!shieldActive && shield<3){

@@ -39,7 +39,7 @@ int main(){
       }
     }break;
     case GAMEPLAY:{
-      printf("In gameplay\n");
+      //printf("In gameplay\n");
       //skip
       if(IsKeyPressed(KEY_ENTER)){
 	level++;
