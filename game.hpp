@@ -130,6 +130,18 @@ public:
   void DrawShield();
 private:
   //for shield
+  Image shield_image;
+  Texture2D shield_tex;
+  //for health texture
+  Image health_image;
+  Texture2D health_tex;
+  Rectangle health_frameRec;
+  Vector2 health_position;
+  //for ghost texture
+  Image ghost_image;
+  Texture2D ghost_tex;
+  Rectangle frameRec;
+  //for shield
   double lastUpdatedShield= 0.0f;
   bool shieldActive = false;
   int shield;

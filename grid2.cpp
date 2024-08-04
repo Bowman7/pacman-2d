@@ -11,6 +11,11 @@ Maze::Maze(){
 
   
   //SetupPath();
+  
+  //load textures
+  wall_image = LoadImage("Texture/wall.png");
+  wall_tex = LoadTextureFromImage(wall_image);
+  UnloadImage(wall_image);
 }
 
 Maze::~Maze(){
@@ -426,24 +431,7 @@ void Maze::PrintLine(){
 }
 
 void Maze::Draw(){
-
-  /*
-  //draw all box
-  for(int i=0;i<20;i++){
-    for(int j =0;j<40;j++){
-      Color col;
-      if(maze[i][j].colVal == 1){
-	col = BLACK;
-      }else if(maze[i][j].colVal == 2){
-	col = DARKBLUE;
-      }else{
-	col = RED;
-      }
-      DrawRectangle(i*size,j*size,size,size,col);
-      DrawRectangle((i+20)*size,j*size,size,size,maze2[i][j].color);
-    }
-  }
-  */
+  
   for(int i=0;i<40;i++){
     for(int j=0;j<40;j++){
       Color col;
@@ -454,8 +442,14 @@ void Maze::Draw(){
       }else{
 	col = RED;
       }
-      
-      DrawRectangle(i*size,j*size,size,size,f_maze[i][j].color);
+
+      int x = i*25;
+      int y = j*25;
+      if(f_maze[i][j].colVal == 2){
+	DrawTexture(wall_tex,x,y,WHITE);
+      }else if(f_maze[i][j].colVal == 1){
+	DrawRectangle(i*size,j*size,size,size,f_maze[i][j].color);
+      }
     }
   }
   //print grid
