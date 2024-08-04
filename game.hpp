@@ -129,6 +129,10 @@ public:
   bool ShieldSpawn(double);
   void DrawShield();
 private:
+  //music
+  Music music;
+  Sound grabShield;
+  Sound hurt;
   //for shield
   Image shield_image;
   Texture2D shield_tex;
