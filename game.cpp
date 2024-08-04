@@ -54,6 +54,12 @@ Game::Game(){
   shield_image = LoadImage("Texture/shield.png");
   shield_tex = LoadTextureFromImage(shield_image);
   UnloadImage(shield_image);
+  //music
+  InitAudioDevice();
+  music = LoadMusicStream("Music/8-bitheaven.mp3");
+  PlayMusicStream(music);
+  grabShield = LoadSound("Music/one_beep.mp3");
+  hurt = LoadSound("Music/hurt.mp3");
   
 }
 
@@ -1791,8 +1797,10 @@ void Game::UpdateHealth(){
   //for red
   if(ghost.GetX() == pac.GetX() && ghost.GetY() == pac.GetY()){
     if(shield>0){
+      PlaySound(hurt);
       shield--;
     }else{
+      PlaySound(hurt);
       pacHealth--;
     }
     int dir =pac.GetDir();
@@ -1817,8 +1825,10 @@ void Game::UpdateHealth(){
   else if(pinkGhost.GetX() == pac.GetX() && pinkGhost.GetY() == pac.GetY()){
     if(shield>0){
       shield--;
+      PlaySound(hurt);
     }else{
       pacHealth--;
+      PlaySound(hurt);
     }
     int dir =pac.GetDir();
     switch(dir){
@@ -1842,8 +1852,10 @@ void Game::UpdateHealth(){
   else if(blueGhost.GetX() == pac.GetX() && blueGhost.GetY() == pac.GetY()){
     if(shield>0){
       shield--;
+      PlaySound(hurt);
     }else{
       pacHealth--;
+      PlaySound(hurt);
     }
     int dir =pac.GetDir();
     switch(dir){
@@ -1867,8 +1879,10 @@ void Game::UpdateHealth(){
   if(orangeGhost.GetX() == pac.GetX() && orangeGhost.GetY() == pac.GetY()){
     if(shield>0){
       shield--;
+      PlaySound(hurt);
     }else{
       pacHealth--;
+      PlaySound(hurt);
     }
     int dir =pac.GetDir();
     switch(dir){
@@ -2034,6 +2048,8 @@ void Game::DrawShield(){
   }
 }
 void Game::Update(){
+  //update music stream
+  UpdateMusicStream(music);
   //update pac
   pac.Update();
   //check for shield spawn
@@ -2045,6 +2061,7 @@ void Game::Update(){
   //check if ate
   if(pac.GetX() == 20 && pac.GetY()==20){
     if(shieldActive){
+      PlaySound(grabShield);
       printf("Eaten shield\n");
       shieldActive = false;
       shield++;
