@@ -78,6 +78,9 @@ public:
   void InitFinalMaze();
   
 private:
+  //for texture
+  Image wall_image;
+  Texture2D wall_tex;
   s_maze maze[20][40];
   s_maze maze2[20][40];
   s_maze f_maze[40][40];

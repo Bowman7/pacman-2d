@@ -25,6 +25,16 @@ int main(){
   Game game;
   //levels
   int level = 0;
+  //load loading screen
+  Image loading_image;
+  Texture2D loading_tex;
+  Texture2D gameover_tex;
+  loading_image = LoadImage("Texture/startscreen.png");
+  loading_tex = LoadTextureFromImage(loading_image);
+  UnloadImage(loading_image);
+  loading_image = LoadImage("Texture/gameover.png");
+  gameover_tex = LoadTextureFromImage(loading_image);
+  UnloadImage(loading_image);
   //main loop
   while(!WindowShouldClose()){
     switch(currentState){
@@ -114,7 +124,8 @@ int main(){
 
     switch(currentState){
     case STARTWINDOW:{
-      DrawText("Start window",20,20,40,WHITE);
+      //DrawText("Start window",20,20,40,WHITE);
+      DrawTexture(loading_tex,0,0,WHITE);
     }break;
     case STARTCUTSCENE:{
       DrawText("Start cutscene",20,20,40,WHITE);
@@ -149,7 +160,8 @@ int main(){
 	DrawText("Cutscene three",20,20,40,WHITE);
       }break;
     case GAMEOVER:{
-      DrawText("Game over rrrr ",20,20,40,WHITE);
+      //DrawText("Game over rrrr ",20,20,40,WHITE);
+      DrawTexture(gameover_tex,440,330,WHITE);
     }break;
     case GAMEWON:{
       DrawText("Game won",20,20,40,WHITE);

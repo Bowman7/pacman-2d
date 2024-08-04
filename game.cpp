@@ -40,6 +40,21 @@ Game::Game(){
       }
     }
   }
+  //load ghost textire
+  ghost_image  = LoadImage("Texture/ghost.png");
+  ghost_tex = LoadTextureFromImage(ghost_image);
+  UnloadImage(ghost_image);
+  frameRec = {0.0f,0.0f,(float)ghost_tex.width/4,(float)ghost_tex.height/4};
+  //load health texture
+  health_image = LoadImage("Texture/health.png");
+  health_tex = LoadTextureFromImage(health_image);
+  UnloadImage(health_image);
+  health_frameRec = {0.0f,0.0f,(float)health_tex.width,(float)health_tex.height/9};
+  //shield tex
+  shield_image = LoadImage("Texture/shield.png");
+  shield_tex = LoadTextureFromImage(shield_image);
+  UnloadImage(shield_image);
+  
 }
 
 Game::~Game(){
@@ -1933,10 +1948,58 @@ void Game::GameInit(){
 //draw health
 void Game::DrawHealth(){
   int base = 1050;
-  for(int i=1;i<=pacHealth;i++){
-    DrawRectangle(base,30,30,30,RED);
-    base +=32;
+  //DrawTexture(health_tex,base,30,WHITE);
+  switch(pacHealth){
+  case 5:
+    {
+      health_frameRec.y = 0.0f;
+    }break;
+  case 4:
+    {
+      health_frameRec.y = 50.0f;
+    }break;
+  case 3:
+    {
+      health_frameRec.y = 100.0f;
+    }break;
+  case 2:
+    {
+      health_frameRec.y = 150.0f;
+    }break;
+  case 1:
+    {
+      health_frameRec.y = 200.0f;
+    }
   }
+  health_position.x = 1050.0f;
+  health_position.y = 30.0f;
+  //draw  healths
+  DrawTextureRec(health_tex,health_frameRec,health_position,WHITE);
+  switch(shield){
+  case 3:
+    {
+      health_frameRec.y = 250.0f;
+    }break;
+  case 2:
+    {
+      health_frameRec.y = 300.0f;
+    }break;
+  case 1:
+    {
+      health_frameRec.y = 350.0f;
+    }break;
+  case 0:
+    {
+      health_frameRec.y = 400.0f;
+    }break;
+  default:
+    break;
+  }
+
+  health_position.x = 1050.0f;
+  health_position.y = 100.0f;
+  //draw  healths
+  DrawTextureRec(health_tex,health_frameRec,health_position,WHITE);
 }
 //update eaten spirits
 void Game::UpdateEatenSpirits(){
@@ -1964,13 +2027,10 @@ bool Game::ShieldSpawn(double time){
 //draw shield
 void Game::DrawShield(){
   if(shieldActive){
-    DrawRectangle(20*25,20*25,25,25,WHITE);
-  }
-  int posx = 1050;
-  int posy = 70;
-  for(int i=0;i<shield;i++){
-    DrawRectangle(posx,posy,25,25,WHITE);
-    posx+=30;
+    //DrawRectangle(20*25,20*25,25,25,WHITE);
+    int x = 20-1;
+    int y = 20-1;
+    DrawTexture(shield_tex,x*25,y*25,WHITE);
   }
 }
 void Game::Update(){
@@ -1997,7 +2057,7 @@ void Game::Update(){
   //printf("Eaten spirits: %d\n",eatenSpirits);
   
   //print pacman health
-  //UpdateHealth();
+  UpdateHealth();
   //check if health over
   CheckWonOrOver();
   
@@ -2250,10 +2310,10 @@ void Game::Draw(){
   maze.Draw();
   DrawCoin();
   pac.Draw();
-  ghost.Draw();
-  pinkGhost.Draw();
-  blueGhost.Draw();
-  orangeGhost.Draw();
+  ghost.Draw(ghost_tex,frameRec,0);
+  pinkGhost.Draw(ghost_tex,frameRec,1);
+  blueGhost.Draw(ghost_tex,frameRec,2);
+  orangeGhost.Draw(ghost_tex,frameRec,3);
   DrawHealth();
   DrawShield();
  

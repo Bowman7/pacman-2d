@@ -15,7 +15,7 @@ public:
   Ghost();
   ~Ghost();
   void Update();
-  void Draw();
+  void Draw(Texture2D,Rectangle,int);
   void InitGhost();
   
   void Move(int);
@@ -82,4 +82,6 @@ private:
   int y;
   g_direction dir;
   double lastUpdatedTime=0.0;
+  //for texture
+  
 };
