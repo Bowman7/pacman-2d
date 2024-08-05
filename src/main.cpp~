@@ -3,7 +3,7 @@
 #define WIDTH 1300
 #define HEIGHT 1000
 
-#include"include/game.hpp"
+#include"game.hpp"
 
 enum State{
   STARTWINDOW=0,

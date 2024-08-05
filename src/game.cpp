@@ -1,4 +1,4 @@
-#include"game.hpp"
+#include"../include/game.hpp"
 
 Game::Game(){
   InitCoin();
@@ -2062,7 +2062,7 @@ void Game::Update(){
   if(pac.GetX() == 20 && pac.GetY()==20){
     if(shieldActive){
       PlaySound(grabShield);
-      printf("Eaten shield\n");
+      //printf("Eaten shield\n");
       shieldActive = false;
       shield++;
       
@@ -2123,13 +2123,13 @@ void Game::Update(){
       InitBlueMoveDir();
       //InitOrangeMoveDir();
       
-      printf("\nSCATTER MODE\n");
+      //printf("\nSCATTER MODE\n");
       ghostMode = 0;//for red ghost
       pGhostMode = 0;//for pink ghost
       bGhostMode = 0;//for blue ghost
       
     }else if(ghostMode == 0){//hunt mode
-      printf("\nHUNT MODE\n");
+      //printf("\nHUNT MODE\n");
       //for red ghost
       if(!rReachedLastTile){
 	rReachedLastTile = true;
