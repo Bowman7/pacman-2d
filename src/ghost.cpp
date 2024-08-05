@@ -1,4 +1,4 @@
-#include"ghost.hpp"
+#include"../include/ghost.hpp"
 
 Ghost::Ghost(){
   InitGhost();

@@ -1,4 +1,4 @@
-#include"pac.hpp"
+#include"../include/pac.hpp"
 
 Pac::Pac(){
   InitPacman();

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-g++ main.cpp game.cpp grid2.cpp pac.cpp ghost.cpp -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -g
+g++ src/main.cpp src/game.cpp src/grid2.cpp src/pac.cpp src/ghost.cpp -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -g

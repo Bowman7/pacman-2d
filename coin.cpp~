@@ -1,6 +1,0 @@
-#include"coin.hpp"
-
-Coing::Coin(){
-  eaten =  false;
-}
-

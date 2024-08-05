@@ -1,4 +1,4 @@
-#include"grid2.hpp"
+#include"../include/grid2.hpp"
 
 Maze::Maze(){
   InitMaze();
