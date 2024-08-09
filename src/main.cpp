@@ -16,6 +16,7 @@ enum State{
   GAMEWON
   
 };
+
 int main(){
   //init window
   InitWindow(WIDTH,HEIGHT,"window");
@@ -64,6 +65,12 @@ int main(){
   Sound gameWin;
   Sound gameWinCutscene;
   Sound gameOver;
+
+  //for gameplay
+  Music g_music;
+  Sound grabShield;
+  Sound hurt;
+  
   InitAudioDevice();
   music = LoadMusicStream("Music/gamemusic1.mp3");
   PlayMusicStream(music);
@@ -72,11 +79,15 @@ int main(){
   gameWinCutscene = LoadSound("Music/levelup.mp3");
   gameOver = LoadSound("Music/gameover.wav");
 
-  
+  //for gameplay
+   g_music = LoadMusicStream("Music/8-bitheaven.mp3");
+   grabShield = LoadSound("Music/one_beep.mp3");
+   hurt = LoadSound("Music/hurt.mp3");
   
   //main loop
   while(!WindowShouldClose()){
     UpdateMusicStream(music);
+    UpdateMusicStream(g_music);
     switch(currentState){
     case STARTWINDOW:{
       
@@ -89,6 +100,7 @@ int main(){
       if(IsKeyPressed(KEY_ENTER)){
 	PlaySound(selectSound);
 	StopMusicStream(music);
+	PlayMusicStream(g_music);
 	currentState = GAMEPLAY;
       }
     }break;
@@ -150,6 +162,7 @@ int main(){
 	  {
 	    level = 0;
 	    game.GameInit();
+	    StopMusicStream(g_music);
 	    currentState = GAMEWON;
 	  }break;
 	default:
@@ -159,6 +172,7 @@ int main(){
       //check for game over
       if(game.IsGameOver()){
 	//init game
+	StopMusicStream(g_music);
 	game.GameInit();
 	PlaySound(gameOver);
 	currentState = GAMEOVER;
@@ -167,7 +181,16 @@ int main(){
       game.HandleInputs();
       //update
       game.Update();
-      
+      //play sound for checks
+      if(game.Hit()){
+	  PlaySound(hurt);
+	  game.HitFalse();
+      }
+      //if sheld grab
+      if(game.Grab()){
+	PlaySound(grabShield);
+	game.GrabFalse();
+      }
     }break;
       
     case CUTSCENE_ONE:{
