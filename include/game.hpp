@@ -128,11 +128,23 @@ public:
   //bool
   bool ShieldSpawn(double);
   void DrawShield();
+
+  bool Hit(){
+    return hit;
+  }
+  void HitFalse(){
+    hit = false;
+  }
+  bool Grab(){
+    return grab;
+  }
+  void GrabFalse(){
+    grab =false;
+  }
 private:
-  //music
-  Music music;
-  Sound grabShield;
-  Sound hurt;
+  //if hit
+  bool grab = false;
+  bool hit=false;;
   //for shield
   Image shield_image;
   Texture2D shield_tex;
